@@ -1,104 +1,70 @@
 import sys
-from collections import deque
-from Assets import *
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow,QMessageBox
+    QApplication
 )
+from DynamicAssets import *
 from pathlib import Path
-from datetime import date
+import glob
+
 
 # https://www.pythonguis.com/tutorials/pyqt6-widgets/
 # https://stackoverflow.com/questions/47910192/qgridlayout-different-column-width
 # https://stackoverflow.com/questions/4286036/how-to-have-a-directory-dialog
 
+class SubwayLine(QWidget):
+    elements = []
+    script_path = ''
+    i=0
+
+    def __init__(self, folder, startfile, elements_strs):
+
+        super().__init__()
+        self.work_folder = folder + '/*' + startfile + '*'
+        self.layout = QHBoxLayout()
+        for s in elements_strs:
+            self.add_element(s)
+
+    def add_element(self, s):
+        elt_type = s.split("::")[0]
+        if elt_type == 'File':
+            label = s.split("::")[1]
+            elt = Node_dynamic(label, self.work_folder + label, self.script_path)
+            elt.n.clicked.connect(lambda: self.onclick(self.i))
+            self.i+=1
+            self.elements.append(elt)
+        elif elt_type == 'Function':  # len==3
+            [label, self.script_path] = s.split("::")[1:2]
+            elt = FunctionArrow(label)
+        else:
+            elt = QC_static()  # TODO
+        self.layout.addWidget(elt)
+
+    def onclick(self, end):
+        for i in range(1, end):
+            if self.elements[i - 1].file_exists and not self.elements[i].file_exists:
+                self.elements[i].onclick()
+
 
 class Subway(QMainWindow):
+    strs = []
+
     def __init__(self):
         super().__init__()
-        glob_path = QFileDialog.getExistingDirectory(self, 'Choose your work path (folder to scan for files in):')
-        schema_path = QFileDialog.getOpenFileName(self, 'Choose your schema (template for subway):')
+        work_folder = QFileDialog.getExistingDirectory(self, 'Choose your work path (folder to scan for files in):')
+        schema_path = QFileDialog.getOpenFileName(self, 'Choose your schema (template for subway):')[0]
 
+        self.layout = QVBoxLayout()
+        with open(schema_path, 'r') as file:
+            while line := file.readline().rstrip():
+                self.strs.append(line)
+        startfile = self.strs[0].split('::')[-1]
         # for each starter file found, create a schema
-        for path in Path(glob_path).rglob('*.'):
-            pass
-
-
-class SchemaBuilder(QMainWindow):
-    elements = deque()
-    strs = deque()
-    counter = False
-
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle('SubwayGUI Work Schema Builder')
-        self.layout = QHBoxLayout()
-        start_button = QPushButton('Add Node')
-        start_button.clicked.connect(self.start_adding_nodes)
-        self.layout.addWidget(start_button)
+        for this_start_file in Path(work_folder).rglob('*' + startfile):
+            self.layout.addWidget(SubwayLine(work_folder,this_start_file,self.strs))
         w = QWidget()
         w.setLayout(self.layout)
         self.setCentralWidget(w)
-
-    def add_element(self, type, typestr,s):
-        elt = type(s)
-        self.elements.append(elt)
-        self.layout.addWidget(elt)
-        self.strs.append(typestr+'::'+s)
-
-    def start_adding_nodes(self):
-        button = self.sender()
-        button.deleteLater()
-        info = self.show_input_dialog('Input first step')
-        self.add_element(Node_static,'File', info[0])
-        self.add_step(info)
-
-    def show_input_dialog(self, str, prev_step=None):
-        w = InputStepInfoDialog(prev_step)
-        w.setWindowTitle(str)
-        w.show()
-        if w.exec():
-            info=w.info
-            w.close()
-            return info
-
-    def add_step(self, info):
-        # TODO dummy check: cannot input same name twice
-        self.add_element(FunctionArrow_static,'Function', info[1])
-        # TODO assume at least one step..
-        self.add_element(Node_static,'File', info[2])
-        if info[3] != '':
-            self.add_element(QC_static,'QC', info[3])
-
-    def delete_step(self):
-        self.elements.pop()
-        self.strs.pop()
-
-    def save_dialog(self):
-        qm=QMessageBox
-        ans=qm.question(self, '', "Do you want to save the current schema?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        if ans==QMessageBox.StandardButton.Yes:
-            fn=QFileDialog.getSaveFileName(self,'select','new_schema_'+date.today().strftime('%Y%m%d'),'Text Files (*.txt)')
-            with open(fn[0],'w+') as file:
-                while self.strs:
-                    file.write(self.strs[0]+'\n')
-                    self.strs.popleft()
-
-    def mouseReleaseEvent(self, QMouseEvent):
-        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
-            if self.counter:  # detect double click
-                self.counter = False
-                info = self.show_input_dialog('Input next step', prev_step=self.strs[-1].split('::')[-1])
-                self.add_step(info)
-            else:
-                self.counter = True
-
-    def keyReleaseEvent(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key.Key_S:
-            self.save_dialog()
-            self.close()
-        if QKeyEvent.key() == Qt.Key.Key_Delete:
-            self.delete_step()
-
+        self.setWindowTitle('SubwayGUI File System')
 
 
 class MainWindow(QMainWindow):
