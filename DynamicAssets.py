@@ -6,6 +6,7 @@ from collections import deque
 from datetime import date
 import matlab.engine
 import os.path
+from pathlib import Path
 import glob
 
 
@@ -25,13 +26,15 @@ class SchemaBuilder(QMainWindow):
         w.setLayout(self.layout)
         self.setCentralWidget(w)
 
-    def add_element(self, type, typestr, label, filepath=None):
+    def add_element(self, type, typestr, label, filepath=None, manual=None):
         elt = type(label)
         self.elements.append(elt)
         self.layout.addWidget(elt)
         str = typestr + '::' + label
-        if (filepath):
-            str += '::' + filepath
+        if manual:
+            str += '::null::manual'
+        elif filepath:
+            str += ('::' + filepath)
         self.strs.append(str)
 
     def start_adding_nodes(self):
@@ -52,7 +55,7 @@ class SchemaBuilder(QMainWindow):
 
     def add_step(self, info):
         # TODO dummy check: cannot input same name twice
-        self.add_element(FunctionArrow, 'Function', info[1], info[-1])
+        self.add_element(FunctionArrow, 'Function', info[1], filepath=info[4], manual=info[5])
         # TODO assume at least one step..
         self.add_element(Node, 'File', info[2])
         if info[3] != '':
@@ -95,24 +98,17 @@ class Node_dynamic(QWidget):
     QC = None
     file_exists = False
     projected_filepath = ''
-    filepath = None
+    filepath = ''
 
-    def find_file(self):
-        try:
-            self.filepath = glob.glob(self.projected_filepath)[0]
-            self.file_exists = True
-            self.n.setToolTip(self.filepath)
-        except:
-            return
-
-    def __init__(self, label, projected_filepath, script_path):
+    def __init__(self, folder, prefix, suffix, script_path, prev_node=None,exists=False,step_name=None):
         super().__init__()
-        self.projected_filepath = projected_filepath
+        self.fullpath = folder+'/'+prefix+suffix
         self.script_path = script_path
-        self.find_file()
+        self.prev_node=prev_node
         lo = QVBoxLayout()
         self.setLayout(lo)
         self.n = QPushButton()
+        #self.n.clicked.connect(self.onclick)
         self.n.setCheckable(True)
         self.n.setFlat(True)
         self.n.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
@@ -121,14 +117,43 @@ class Node_dynamic(QWidget):
             "width:28px;height:28px;border-radius:14px; } \n"
             "QPushButton:pressed { background-image: url('C:/Users/damao/PycharmProjects/subway/node_failed.png') ;}\n"
             "QPushButton:disabled { background-image : url('C:/Users/damao/PycharmProjects/subway/node_success.png') ; } \n")
-        l = QLabel(label)
+        if exists:
+            self.set_file_exist()
+        else:
+            self.find_file()
         lo.addWidget(self.n, alignment=Qt.AlignmentFlag.AlignCenter)
-        lo.addWidget(l)
+        lo.addWidget(QLabel(suffix))
         lo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+    def set_file_exist(self):
+        self.file_exists=True
+        self.n.setDisabled(True)
+        self.n.setToolTip(self.fullpath)
+
+    def set_file_un_exist(self):
+        self.file_exists = False
+        self.n.setDisabled(False)
+        self.n.setToolTip(None)
+
+    def find_file(self):
+        try:
+            fs = glob.glob(self.fullpath)
+            if(len(fs)>1):
+                str='found more than one file. List of files: \n'
+                for f in fs:
+                    str=str+f+'\n'
+                QMessageBox.warning(self, "Multiple files found",str)
+            self.set_file_exist()
+        except:
+            self.set_file_un_exist()
 
     def onclick(self):
         if not self.file_exists:
             self.n.setDown(False)
+            if self.script_path == 'null':
+                QMessageBox.about(self, "Manual Step required",
+                                  "Manual Step required: Please complete specified manual step and try again!")
+                return
             self.generate_file()
             self.find_file()
             if self.file_exists:
@@ -136,22 +161,47 @@ class Node_dynamic(QWidget):
             else:
                 self.n.setDown(True)
                 QMessageBox.critical(self, "Warning",
-                                     "Failed to generate file: " + self.filepath + " by running " + self.script_path)
+                                     "Failed to generate file: " + self.fullpath + " by running " + self.script_path)
+
+    def str_to_matlab_arg(self,s):
+        return "{}".format(s)
 
     def generate_file(self):
         if not os.path.isfile(self.script_path):
             QMessageBox.critical(self, "Error", "Script " + self.script_path + " does not exist")
         if self.script_path[-2:] == '.m':
-            try:
-                eng = matlab.engine.start_matlab()
-                eng.addpath(os.path.dirname(self.script_path), nargout=0)
-                eng.eval(os.path.basename(self.script_path) + '();', nargout=0)
+            eng = matlab.engine.start_matlab()
+            eng.addpath(os.path.dirname(self.script_path))
+            try: #maybe should create matlab eng at beginning of whole program an pass in
+                command=os.path.basename(self.script_path[:-2]) + \
+                        '(\''+self.prev_node.fullpath+'\');'
+                eng.eval(command, nargout=0)
             except:
-                return
+                pass
+            eng.exit()
         elif self.script_path[-3:] == '.py':
             try:
-                exec(open(self.script_path).read())
+                '''$ python argparse_example.py arg'''
+                command='python '+self.script_path+' '+self.fullpath
+                os.system(command)#TODO
             except:
                 return
-        else:
+        else:  # launch software
             QMessageBox.critical(self, "Error", "Function type not supported: only supports .m or .py scripts")
+
+
+'''
+.sbx
+
+//
+default path.
+select multiple folders.
+scroll bar
+save configuration. folder. 
+good name.
+control panel
+file part to find file within subway line.
+branching and converging?
+a pipeline  doens't have to be linear, so it has to be a graph
+do you want separate pieplines or one suway line per folder
+'''
