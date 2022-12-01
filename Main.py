@@ -1,13 +1,14 @@
+from Config import *
 import sys
+from Subway import Subway
+from SchemaBuilder import SchemaBuilder
 from PyQt6.QtWidgets import (
-    QApplication,QScrollArea,
+    QWidget,QPushButton,QHBoxLayout,QApplication,QMenuBar,QTreeView,QSplitter,QTabWidget,QVBoxLayout,QMainWindow
 )
-from PyQt6.QtGui import QGuiApplication,QCloseEvent
-from DynamicAssets import *
-from pathlib import Path
-import os.path
-from PyQt6.QtCore import pyqtSlot, pyqtSignal
 
+from PyQt6.QtCore import Qt,QDir
+from FileSidebar import FileSidebar
+from SubwayStartPage import SubwayStartPage
 
 # https://www.pythonguis.com/tutorials/pyqt6-widgets/
 # https://stackoverflow.com/questions/47910192/qgridlayout-different-column-width
@@ -25,173 +26,97 @@ my_suffix: '_2nd_step.ext2'
 my_fullpath: subway_prefix + my_suffix - the file should satisfy this rule
 my_start_file: subway_prefix + prev_suffix
 '''
-#TODO: refresh function. refresh a subway line or all subway lines. refind all files. this deals with when a file was manually imported/deleted
-
-class SubwayLine(QWidget):
-    elements = []
-    script_path = ''
-    i=1
-
-    def __init__(self, work_folder, start_file, elements_strs):
-        super().__init__()
-        self.elements=[]
-        self.i=1
-        self.script_path=''
-        self.layout = QVBoxLayout(self)
-        self.subway_layout = QHBoxLayout()
-        start_file_suffix = elements_strs[0].split("::")[1]
-        subway_prefix_fullpath=start_file.rstrip(start_file_suffix)
-        self.subway_folder=os.path.dirname(subway_prefix_fullpath)
-        self.subway_prefix=os.path.basename(subway_prefix_fullpath)
-        self.work_folder = work_folder
-
-        first_node = Node_dynamic(folder=self.subway_folder,prefix=self.subway_prefix,
-                                  suffix=start_file_suffix, script_path='',exists=True)
-        self.elements.append(first_node)
-        self.subway_layout.addWidget(first_node)
-        for s in elements_strs[1:]:
-            self.add_element(s)
-
-        closeButton=QPushButton()
-        closeButton.setText("Close")  # text
-        closeButton.setIcon(QIcon("close.png"))  #   # shortcut key
-        closeButton.clicked.connect(self.close)
-
-        title = QLabel(self.subway_prefix)
-        self.layout.addWidget(closeButton, alignment=Qt.AlignmentFlag.AlignRight)
-        self.layout.addWidget(title, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.layout.addLayout(self.subway_layout)
-
-    def add_element(self, s):
-        elt_type = s.split("::")[0]
-        if elt_type == 'File':
-            elt = Node_dynamic(folder=self.subway_folder,
-                               prefix=self.subway_prefix,
-                               suffix=s.split("::")[1],
-                               script_path=self.script_path,
-                               prev_node=self.elements[self.i-1])
-            elt.n.clicked.connect(lambda: self.onclick(self.i))
-            self.i+=1
-            self.elements.append(elt)
-        elif elt_type == 'Function':  # len==3
-            [label, self.script_path] = s.split("::")[1:3]
-            elt = FunctionArrow(label)
-        else:
-            elt = QC_static()  # TODO
-        self.subway_layout.addWidget(elt)
-
-    def onclick(self, end):
-        for i in range(1, end):
-            if self.elements[i - 1].file_exists and not self.elements[i].file_exists:
-                self.elements[i].onclick()
-
-    def refresh(self):
-        for ele in self.elements:
-            if ele.file_exists:
-                ele.find_file()
-        if not self.elements[0].file_exists:
-            QMessageBox.warning(self,'Warning','The start file for /''+self.subway_prefix+'/' no longer exists.')
-            #or just close it right away
-
-
-
-class Subway(QMainWindow):
-    strs = []
-    closed = pyqtSignal(QMainWindow)
-
-    def __init__(self):
-        super().__init__()
-        self.strs=[]
-        self.layout = QVBoxLayout()
-        self.work_folder = QFileDialog.getExistingDirectory(self, 'Choose your work path (folder to scan for files in):').replace('\\','/')
-        schema_path = QFileDialog.getOpenFileName(self, 'Choose your schema (template for subway):')[0].replace('\\','/')
-        self.read_schema(schema_path)
-        width=self.select_start_files()
-
-        # for each starter file found, create a schema
-        w = QWidget()
-        w.setLayout(self.layout)
-        scrollArea = QScrollArea(self)
-        scrollArea.setWidgetResizable(True)
-        scrollArea.setMinimumSize(860,width)
-        scrollArea.setWidget(w)
-        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-        scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.setWindowTitle('SubwayGUI File System')
-        self.setCentralWidget(scrollArea)
-        self.position()
-        self.show()
-
-    def read_schema(self,schema_path):
-        with open(schema_path, 'r') as file:
-            while line := file.readline().rstrip():
-                self.strs.append(line)
-
-    def select_start_files(self):
-        start_file = self.strs[0].split('::')[-1]
-        #buffer for confirming which start_files to include
-        start_files=Path(self.work_folder).rglob('*' + start_file)
-        for start_file in start_files:
-            print(start_file)
-            w=SubwayLine(work_folder=os.path.dirname(start_file), start_file=str(start_file).replace('\\','/'), elements_strs=self.strs)
-            self.layout.addWidget(w)
-        return w.frameGeometry().width() or 480
-        #TODO: deletion in schema builder
-        # closing subway lines that aren't real subway lines
-
-        # .spb, .ephys, .eye, .mat, -quad
-
-    def position(self):
-        qr = self.frameGeometry()
-        cp = self.screen().availableGeometry().topLeft()
-        qr.moveTopLeft(cp)
-        self.move(qr.center())
-
-    @pyqtSlot(QCloseEvent)
-    def closeEvent(self, a0: QCloseEvent) -> None:
-        self.closed.emit(self)
-        super().closeEvent(a0)
-        #properly close myself..might be better ways to do it
-        #https://stackoverflow.com/questions/65356836/how-do-i-remove-every-reference-to-a-closed-windows
-
 
 class MainWindow(QMainWindow):
+    wrs=None
     def __init__(self):
         super().__init__()
+        self.setWindowTitle('Welcome to SubwayGUI!')
+        self.setMinimumSize(1290,860)
+        menuBar = QMenuBar()
+        self.setMenuBar(menuBar)
+        filesMenu = menuBar.addMenu("&Files")
+        startsPageMenu = menuBar.addMenu("&Start Page")
+        settingsMenu = menuBar.addMenu("&Settings")
+
+        # https://stackoverflow.com/questions/5144830/how-to-create-folder-view-in-pyqt-inside-main-window
+        layout = QHBoxLayout()
+        splitterFileView = QSplitter(Qt.Orientation.Vertical)
+        splitterActions = QSplitter(Qt.Orientation.Vertical)
+        self.tabs=QTabWidget()
+        self.tabs.setTabsClosable(True)
+        self.tabs.tabCloseRequested.connect(self.delete_tab)
+        splitterActions.addWidget(self.tabs)
+
+        self.fileSidebar = FileSidebar(cur_work_folder)
+        splitterFileView.addWidget(self.fileSidebar)
+        #TODO should i give all qcs handle to splitter view?
+
         self.start_page()
 
-    def start_page(self):
-        self.setWindowTitle('Welcome to SubwayGUI!')
-        layout = QHBoxLayout()
-
-        rs = QPushButton('Run subway check')
-        rs.clicked.connect(self.run_subway)
-        layout.addWidget(rs)
-
-        sns = QPushButton('Start new schema')
-        sns.clicked.connect(self.start_new_schema)
-        layout.addWidget(sns)
-
-        ees = QPushButton('Edit existing schema')
-        ees.clicked.connect(self.edit_existing_schema)
-        layout.addWidget(ees)
+        layout.addWidget(splitterFileView,30)
+        layout.addWidget(splitterActions,70)
+        self.setLayout(layout)
 
         w = QWidget()
         w.setLayout(layout)
         self.setCentralWidget(w)
 
-    def run_subway(self):
-        self.wrs = Subway()
+    def start_page(self):
+        self.start_tab = QWidget()
+        start_tab_layout=QVBoxLayout()
+        self.start_tab.setLayout(start_tab_layout)
+        self.tabs.addTab(self.start_tab,"start page")
+
+        run_subway_check_button = QPushButton('Run subway check')
+        run_subway_check_button.clicked.connect(self.run_subway_start_page)
+        start_tab_layout.addWidget(run_subway_check_button)
+
+        new_schema_module = QPushButton('Start new schema')
+        new_schema_module.clicked.connect(self.start_new_schema)
+        start_tab_layout.addWidget(new_schema_module)
+
+        edit_schema_module = QPushButton('Edit existing schema')
+        edit_schema_module.clicked.connect(self.edit_existing_schema)
+        start_tab_layout.addWidget(edit_schema_module)
+
+    def run_subway_start_page(self):
+        self.ssp = SubwayStartPage()
+        self.ssp.return_signals.connect(self.run_subway)
+        self.tabs.addTab(self.ssp, 'Subway Start Page')
+        self.tabs.setCurrentWidget(self.ssp)
+
+    def run_subway(self,work_folders,schema_path):
+        self.ssp.close()
+        self.wrs=Subway(work_folders,schema_path)
+        self.wrs.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.tabs.addTab(self.wrs.scrollArea, work_folders[0])
+        self.tabs.setCurrentWidget(self.wrs.scrollArea)
 
     def start_new_schema(self):
         self.wsns = SchemaBuilder()
-        self.wsns.show()
+        self.wsns.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.tabs.addTab(self.wsns,"Schema Builder")
+        self.tabs.setCurrentWidget(self.wsns)
 
     def edit_existing_schema(self):
         pass
 
-app = QApplication(sys.argv)
-window = MainWindow()
-window.show()
-sys.exit(app.exec())
+    def delete_tab(self, index):
+        self.tabs.removeTab(index)
 
+    def mousePressEvent(self, QMouseEvent):
+        if self.wrs and QMouseEvent.button() == Qt.MouseButton.RightButton:
+            self.wrs.drop_down(QMouseEvent)
+
+
+
+#what's the right way to pass signals between?
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    e=app.exec()
+    MATLAB_ENGINE.exit()
+    sys.exit(e)
