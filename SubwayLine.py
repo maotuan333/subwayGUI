@@ -4,88 +4,94 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt
-from NodeDynamic import NodeDynamic
 import os.path
-from StaticAssets import FunctionArrow
+from DynamicStepUnit import DynamicStepUnit,DynamicStartFile
 
 
 class SubwayLine(QWidget):
+    i=1 # current index of steps
 
-    def __init__(self, work_folder, start_file, elements_strs):
+    def __init__(self, schema, start_file):
         super().__init__()
-        self.elements = []
-        self.i = 1
+
+        # Create main layout
         self.layout = QVBoxLayout(self)
-        buttons_layout=QHBoxLayout()
+        self.setLayout(self.layout)
+
+        # Get file identifier of start file
+        start_file_suffix = schema[0]['input']
+
+        # Get folder and common prefix of files in this subway line
+        prefix_fullpath = pathlib.Path(str(start_file).rstrip(start_file_suffix))
+        self.folder = prefix_fullpath.parent
+        self.prefix = prefix_fullpath.name
+
+        # Create layout of subway line
         self.subway_layout = QHBoxLayout()
-        start_file_suffix = elements_strs[0].split('::')[POS_SUFFIX]
-        subway_prefix_fullpath = start_file.rstrip(start_file_suffix)
-        self.subway_folder = os.path.dirname(subway_prefix_fullpath)
-        self.subway_prefix = os.path.basename(subway_prefix_fullpath)
-        self.work_folder = work_folder
 
-        first_node = NodeDynamic(folder=self.subway_folder, prefix=self.subway_prefix,
-                                 suffix=start_file_suffix, exists=True)
-        self.elements.append(first_node)
+        # Add node for start file
+        first_node = DynamicStartFile(folder=self.folder, prefix=self.prefix, suffix=start_file_suffix)
         self.subway_layout.addWidget(first_node)
-        for s in elements_strs[1:]:
-            self.add_element(s)
 
+        # Add each following step
+        for each_step in schema:
+            self.add_step(each_step)
+
+        # Create layout of function buttons
+        buttons_layout=QHBoxLayout()
+        buttons_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
+
+        # Refresh button
         refresh_button = QPushButton()
         refresh_button.setText("Refresh")
         refresh_button.clicked.connect(self.refresh)
         buttons_layout.addWidget(refresh_button)
 
+        # Close button
         close_button = QPushButton()
-        close_button.setText("Close")  # text
-        close_button.setIcon(QIcon("close.png"))  # # shortcut key
+        close_button.setText("Close")
         close_button.clicked.connect(self.close)
         buttons_layout.addWidget(close_button)
-        buttons_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        title = QLabel(self.subway_prefix)
+        # Organize widgets (top to bottom): function buttons, title, file train
         self.layout.addLayout(buttons_layout)
+        title = QLabel(self.prefix)
         self.layout.addWidget(title, alignment=Qt.AlignmentFlag.AlignCenter)
         self.layout.addLayout(self.subway_layout)
 
-    def add_element(self, s):
-        splitted=s.split('::')
-        elt_type =splitted[POS_TYPE]
-        if elt_type == 'File':
-            try:
-                _=splitted[POS_IS_MANUAL]
-                manual=True
-            except:
-                manual=False
-            elt = NodeDynamic(folder=self.subway_folder,
-                              prefix=self.subway_prefix,
-                              suffix=splitted[POS_SUFFIX],
-                              script_path=splitted[POS_SCRIPT],
-                              qc_suffix=splitted[POS_QC],
-                              readme_path=splitted[POS_README],
-                              prev_node=self.elements[self.i - 1],
-                              manual=manual)
-            self.elements.append(elt)
-            i=self.i
-            elt.n.clicked.connect(lambda: self.onclick(i))
-            self.i += 1
-        elif elt_type == 'Function':  # len==3
-            label = s.split("::")[POS_SUFFIX]
-            elt = FunctionArrow(label)
-        self.subway_layout.addWidget(elt)
+    # Wrapper for adding step
+    def add_step(self, info):
+        step = DynamicStepUnit(folder=self.folder,
+                              prefix=self.prefix,
+                              info=info)
+        self.subway_layout.addWidget(step)
+        # Record current index of step for file generation
+        i=self.i
+        step.node.button.clicked.connect(lambda: self.onclick(i))
+        # Connect QC (if any) to QC viewer
+        try:
+            step.qc.button.clicked.connect()
+        except:
+            pass
+        self.i += 1
 
-    def onclick(self, end):
-        for i in range(1, end+1):
-            if self.elements[i - 1].file_exists and not self.elements[i].file_exists:
-                self.elements[i].onclick()
+    # Loop through and generate all files until the target file
+    def onclick(self, target):
+        for i in range(1,target+1):
+            step=self.subway_layout.itemAt(i).widget()
+            if not step.file_exists():
+                step.onclick()
 
+    # Refresh all the files in subway.
     def refresh(self):
-        for ele in self.elements:
-            if ele.file_exists:
-                ele.refresh()
-        if not self.elements[0].file_exists:
+        # Refresh each file
+        for step in self.subway_layout.children().widget():
+            step.refresh()
+        # If the start file no longer exists, this subway line is no longer considered valid.
+        if not self.layout.itemAt(0).file_exists():
             qm=QMessageBox.StandardButton
-            ans=QMessageBox.question(self, 'Warning', 'The start file for \''+self.subway_prefix+'  \' no longer exists. Close the subwayline?', qm.Yes|qm.No)
+            # Ask user if they want to delete this subway line
+            msg='The start file for \''+self.prefix+'  \' no longer exists. Close the subwayline?'
+            ans=QMessageBox.question(self, 'Warning', msg, qm.Yes|qm.No)
             if ans==qm.Yes:
                 self.deleteLater()
-            # or just close it right away

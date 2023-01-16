@@ -1,129 +1,154 @@
 from Config import *
-from StaticAssets import NodeStatic,FunctionArrow
+from StaticAssets import NodeStatic, FunctionArrow
 from InputStepInfoDialog import InputStepInfoDialog
 from PyQt6.QtWidgets import (
-    QWidget,QMessageBox,QHBoxLayout,QPushButton,QFileDialog
+    QWidget, QMessageBox, QHBoxLayout, QPushButton, QFileDialog, QGridLayout
 )
 from PyQt6.QtCore import Qt
 from datetime import date
+import json
+from Toolbox import schema_reader
 
+# A canvas for building schemas (rules of file trains) that will be used to find files
 class SchemaBuilder(QWidget):
-    elements = []
-    strs = []
-    counter = False
-
     def __init__(self):
         super().__init__()
-        self.layout = QHBoxLayout()
-        self.prev_step=None
-        self.add_start_button()
-        self.setLayout(self.layout)
 
+        # Initialize
+        # steps: list of dicts, a record of steps information
+        # used for info exchange within the gui
+        self.steps=list()
+        # toggle: toggle switch that detects double click
+        self.toggle=False
+
+        # Create layout
+        self.layout = QHBoxLayout()
+        self.setLayout(self.layout)
+        # Start page
+        self.add_start_button()
+
+    # Display start button
     def add_start_button(self):
         start_button = QPushButton('Add Node')
-        start_button.setFocusPolicy(Qt.FocusPolicy.NoFocus) #can't delete or save at first step if I don't do this
-        start_button.clicked.connect(self.start_adding_nodes)
+        # can't delete or save at first step if I don't do this (TODO why?)
+        start_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        start_button.clicked.connect(self.add_first_step)
         self.layout.addWidget(start_button)
 
-    def add_element(self, type, label, dynamic=True, script_path='', readme_path='', qc_label=None, is_manual=None):
-        if qc_label:
-            elt = type(label,qc_label=qc_label) #TODO not a good way...
-        else:
-            elt = type(label)
-        self.elements.append(elt)
-        self.layout.addWidget(elt)
-        if type==NodeStatic: # POS_TYPE = 0
-            str = 'File'
-        elif type==FunctionArrow:
-            str = 'Function'
-        else:
-            str = 'Unknown'
-        str += ('::' + label) # POS_SUFFIX = 1
-        if dynamic:
-            str += '::SPACER' # TODO use this spot for something
-            if qc_label: # POS_QC = 3
-                str += ('::' + qc_label)
-            else:
-                str += ('::' + DEFAULT_NO_QC)
-            if readme_path: # POS_README = 4
-                str += ('::' + readme_path)
-            else:
-                str += ('::' + DEFAULT_NO_README)
-            if script_path:  # POS_SCRIPT = 5
-                str += ('::' + script_path)
-            else:
-                str += ('::' + DEFAULT_NO_SCRIPT)
-            if is_manual: # POS_IS_MANUAL = 6
-                str += '::MANUAL'
-        self.strs.append(str)
+    def delete_start_button(self):
+        # If start button is present then no other widget should be
+        start_button = self.layout.itemAt(0).widget()
+        self.layout.removeWidget(start_button)
+        start_button.setParent(None)
+        start_button.deleteLater()
 
-    def start_adding_nodes(self):
-        button = self.sender()
-        button.deleteLater()
+    # This function adds the first node of a schema
+    def add_first_step(self):
+        # Remove start button
+        self.delete_start_button()
+        # Get inputs using dialog
         info = self.show_input_dialog('Input first step')
         if info:
-            self.add_element(NodeStatic, info[POS_INPUT],dynamic=False) #only need to add 1st node (inactive) in 1st step
+            # Append current step to list of steps
+            self.steps.append(info)
+            # The first node is added separately
+            self.layout.addWidget(NodeStatic(info['input']))
+            # Add function used by the first step and its output
             self.add_step(info)
 
-    def show_input_dialog(self, str, prev_step=None):
-        w = InputStepInfoDialog(prev_step)
-        w.setWindowTitle(str)
+    # Wrapper that returns info from input dialog
+    def show_input_dialog(self, msg):
+        w = InputStepInfoDialog(self.get_prev())
+        w.setWindowTitle(msg)
         w.show()
         if w.exec():
             info = w.info
             w.close()
             return info
 
+    # Add a step to the schema.
+    # A step does not include the input, only the function and output node.
+    # The first node is added separately by start_adding_nodes.
     def add_step(self, info):
         # TODO dummy check: cannot input same name twice
-        self.prev_step=info[POS_OUTPUT]
-        self.add_element(FunctionArrow, info[POS_FUNC],dynamic=False)
-        self.add_element(NodeStatic, info[POS_OUTPUT], script_path=info[POS_SCRIPT], readme_path=info[POS_README],
-                         qc_label=info[POS_QC], is_manual=info[POS_IS_MANUAL])
+        self.layout.addWidget(FunctionArrow(info['func']),alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.layout.addWidget(NodeStatic(info['output'],qc_meta=info.get('qc_meta'),qc_img=info.get('qc_img')),
+                              alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.steps.append(info)
 
+    # Delete the last step added
     def delete_step(self):
-        self.elements.pop()
-        self.strs.pop()
-        count = self.layout.count()
-        self.layout.itemAt(count-1).widget().deleteLater()
-        if count > 1:
-            self.layout.itemAt(count-2).widget().deleteLater()
-        if count==1: #~perfection :/
-            self.add_start_button()
+        # Remove record of the last step from list
+        self.steps.pop()
+        # Get indexes of items to be deleted
+        for i in range(2):
+            index_last_item=self.layout.count() - 1
+            #TODO: delete function unit
+            # remove last node
+            last_item = self.layout.itemAt(index_last_item)
+            self.layout.removeItem(last_item)
+            last_item.widget().deleteLater()
+            # If all nodes had been deleted
+            if index_last_item == 0:
+                # Restore start page and return
+                self.add_start_button()
+                return
 
+    # Save new schema as json file
     def save_dialog(self):
+        # Yes/no dialog pops up
         qm = QMessageBox.StandardButton
-        ans = QMessageBox.question(self, '', "Do you want to save the current schema?", qm.Yes | qm.No)
+        msg = 'Do you want to save the current schema?'
+        ans = QMessageBox.question(self, '', msg, qm.Yes | qm.No)
+        # If user says yes:
         if ans == qm.Yes:
+            # Default file name is new_schema_YYMMDD.json
             fn = QFileDialog.getSaveFileName(self, 'Save schema:', 'new_schema_' + date.today().strftime('%Y%m%d'),
-                                             'Text Files (*.txt)')
+                                             'JSON file (*.json)')
+            # Dump schema info into json
             with open(fn[0], 'w+') as file:
-                for str in self.strs:
-                    file.write(str + '\n')
+                json.dump(self.steps, file, indent=1)
+        # Close this tab
+        self.deleteLater()
+        self.close()
 
-    def mouseReleaseEvent(self, QMouseEvent):
-        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
-            if self.counter:  # detect double click
-                self.counter = False
-                info = self.show_input_dialog('Input next step', prev_step=self.prev_step)
+    # Return the output of last step, i.e. input of new step
+    def get_prev(self):
+        if self.steps:
+            return self.steps[-1]['output']
+        else:
+            return None
+
+    # Load schema from json file to edit
+    def restore(self, filepath):
+        self.delete_start_button()
+        self.steps=schema_reader(filepath)
+        if self.steps:
+            # Add first node
+            self.layout.addWidget(NodeStatic(self.steps[0]['input']))
+            # Add subsequent steps
+            for info in self.steps[]:
                 self.add_step(info)
-            else:
-                self.counter = True
 
+    # Double click to add new step
+    def mouseReleaseEvent(self, QMouseEvent):
+        # Detect left clicks
+        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
+            # If this is the second click
+            if self.toggle:
+                self.toggle = False
+                # Display input dialog
+                info = self.show_input_dialog('Input next step')
+                # Process info from input dialog
+                self.add_step(info)
+            # If this is the first click
+            else:
+                self.toggle = True # record first click
+
+    # Press S for save schema, D for delete step
     def keyReleaseEvent(self, QKeyEvent):
         if QKeyEvent.key() == Qt.Key.Key_S:
             self.save_dialog()
             self.close()
         if QKeyEvent.key() == Qt.Key.Key_D:
             self.delete_step()
-
-
-
-
-
-
-
-
-
-
-
