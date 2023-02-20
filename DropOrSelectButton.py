@@ -1,48 +1,30 @@
-from Config import *
 from PyQt6.QtWidgets import (
-    QFileDialog, QPushButton,QLabel,QSizePolicy
+    QFileDialog, QPushButton,QLabel
 )
-from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt, pyqtSignal
 import os.path
 
 
 class DropOrSelectButton(QPushButton):
     files = None
-    is_single_file = False
-    is_dir = False
-    embedded_text=False
     label=None
     extensions = None
     return_signal=pyqtSignal(list)
 
-    def __init__(self, title, file_dialog_function, file_dialog_msg, file_dialog_filter=None, icon=None, is_single_file=False, is_dir=False, embedded_text=None, initial_text=''):
+    def __init__(self, title, file_dialog_function, file_dialog_msg, file_dialog_filter=None, extensions=None,
+                 is_dir=False, is_single_file=True, embedded_text=False, placeholder=''):
         super().__init__()
         self.title=title
-        self.initial_text = initial_text
+        self.initial_text = placeholder
         self.file_dialog_function=file_dialog_function
         self.file_dialog_msg=file_dialog_msg
         self.filter=file_dialog_filter
+        self.extensions=extensions
         self.embedded_text=embedded_text
-        if file_dialog_filter:
-            self.extensions=self.filter[self.filter.find('(')+1:self.filter.find(')')].replace(' ','').split('*.')[1:]
-        # function requests a single file/directory
-
-        if is_single_file: #explicit single selection flag, override other inputs
-            self.is_single_file=is_single_file
-        else: # implicit from function call
-            if self.file_dialog_function == QFileDialog.getOpenFileName \
-            or self.file_dialog_function == QFileDialog.getOpenFileUrl:
-                self.is_single_file = True
-        if is_dir: #explicit directory selection flag, override other inputs
-            self.is_dir=is_dir
-        else: #implicit from function call
-            if self.file_dialog_function == QFileDialog.getExistingDirectory:
-                self.is_dir = True
+        self.is_dir=is_dir
+        self.is_single_file=is_single_file
         self.setFlat(True)
         self.setAutoFillBackground(True)
-        if icon:
-            self.setIcon(icon)
         self.setAcceptDrops(True)
         if embedded_text:
             self.add_label()
@@ -94,34 +76,26 @@ class DropOrSelectButton(QPushButton):
     def dragMoveEvent(self, event):
         if event.mimeData().hasUrls():
             # check number of urls
-            if self.is_single_file:
-                if len(event.mimeData().urls()) > 1:
-                    event.ignore()
-                    return
-                urls=[event.mimeData().urls()[0]]
-            else:
-                urls=event.mimeData().urls()
-            # try to extract valid urls from input
+            urls=[event.mimeData().urls()[0]] if self.is_single_file else event.mimeData().urls()
+
             files = []
             # check if input url(s) has required file/folder extension. Only valid urls are added to files.
             for url in urls:
                 s = str(url.toLocalFile())
                 if self.is_dir and not os.path.isdir(s):
                     continue
-                if self.extensions and not self.is_dir and s.split('.')[-1] not in self.extensions:
+                if not self.is_dir and self.extensions \
+                        and '.'+s.split('.')[-1] not in self.extensions:
                     continue
                 files.append(s)
-            # accept & update if input contains valid info
-            if len(files):
+            # accept and update if input contains valid info
+            if len(files)>0:
                 event.accept()
                 event.setDropAction(Qt.DropAction.CopyAction)
                 if self.embedded_text:
                     self.set_label(files)
-                else:
-                    self.files = files
-                    self.return_signal.emit(self.files)
-        else:
-            event.ignore()
+                self.files = files
+                self.return_signal.emit(self.files)
 
     def return_info(self):
         return self.files

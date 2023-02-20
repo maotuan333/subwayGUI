@@ -1,0 +1,3 @@
+File::filetype
+Function::func
+File::filetype::NOQCMETA::NOQCIMG::C:/Users/damao/PycharmProjects/subway/subway config files/manual step readme-a1316604-dcf2-45f9-8843-4531c3017eec.txt::NOSCRIPT::MANUAL

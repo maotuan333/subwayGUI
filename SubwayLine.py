@@ -1,4 +1,4 @@
-from Config import *
+from config import *
 from PyQt6.QtWidgets import (
     QWidget, QMessageBox, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 )
@@ -19,7 +19,7 @@ class SubwayLine(QWidget):
         self.setLayout(self.layout)
 
         # Get file identifier of start file
-        start_file_suffix = schema[0]['input']
+        start_file_suffix = schema[0].input.show_text
 
         # Get folder and common prefix of files in this subway line
         prefix_fullpath = pathlib.Path(str(start_file).rstrip(start_file_suffix))
@@ -68,11 +68,6 @@ class SubwayLine(QWidget):
         # Record current index of step for file generation
         i=self.i
         step.node.button.clicked.connect(lambda: self.onclick(i))
-        # Connect QC (if any) to QC viewer
-        try:
-            step.qc.button.clicked.connect()
-        except:
-            pass
         self.i += 1
 
     # Loop through and generate all files until the target file

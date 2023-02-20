@@ -1,0 +1,9 @@
+File::.sbx
+Function::blah.m:://umms-crburge.turbo.storage.umich.edu/umms-crburge/Code/AF/newPipeline/blah.m
+File::.ephys
+Function::next_func::.n
+File::_eye_proc.mat
+Function::ReadEyeVidNamesAF.m::null::manual
+File::_dsNidaq.mat
+Function::idk some step::null::manual
+File::_quadrature.mat

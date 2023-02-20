@@ -1,5 +1,5 @@
 from DropOrSelectButton import DropOrSelectButton
-from Config import *
+from config import *
 from PyQt6.QtWidgets import (
     QTabWidget,QVBoxLayout,QHBoxLayout,QLabel,QWidget,QPushButton
 )

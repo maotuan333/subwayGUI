@@ -1,6 +1,6 @@
 import json
 
-from Config import *
+from config import *
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QMessageBox,QFileDialog
 )
@@ -23,25 +23,24 @@ class SubwayStartPage(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QHBoxLayout()
-        icon = QIcon(str(ASSETS_FOLDER/'drop_or_select_button.png'))
 
         self.folder_button = DropOrSelectButton(title='Select or Drop Folder',
-                                                icon=icon,
-                                                initial_text='Drag in or click to select folders.\n\n'
+                                                placeholder='Drag in or click to select folders.\n\n'
                                                              '*: Multiple folders are allowed. \n '
                                                              '   Files that are not directories will be\n'
                                                              '   automatically filtered.',
                                                 file_dialog_function=QFileDialog.getExistingDirectory,
                                                 file_dialog_msg='Choose your work path (folder to scan for files in):',
-                                                embedded_text=True
+                                                embedded_text=True,
+                                                is_single_file=False,
+                                                is_dir=True
                                                 )
         self.folder_button.setMinimumHeight(SQUARE_BUTTON_MIN_HEIGHT)
         self.folder_button.setFixedWidth(SQUARE_BUTTON_MAX_WIDTH)
 
         self.layout.addWidget(self.folder_button)
         self.schema_button = DropOrSelectButton(title='Select or Drop Schema',
-                                                icon=icon,
-                                                initial_text='Drag in or click to select a schema file.\n\n'
+                                                placeholder='Drag in or click to select a schema file.\n\n'
                                                              '*: Only a single .json file is allowed.',
                                                 file_dialog_function=QFileDialog.getOpenFileName,
                                                 file_dialog_msg='Choose your schema (template for subway):',

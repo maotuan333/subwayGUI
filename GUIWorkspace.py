@@ -1,6 +1,6 @@
 import json
 
-from Config import *
+from config import *
 from PyQt6.QtWidgets import (
     QSplitter,QFileDialog
 )
@@ -33,8 +33,7 @@ class GUIWorkspace(QSplitter):
                                 drop_or_select=True,
                                 file_dialog_function = QFileDialog.getOpenFileName,
                                 file_dialog_msg = "Select schema file to edit",
-                                file_dialog_filter= "Schema Files (*.json)",
-                                embedded_text = "(Click or drop file)")
+                                file_dialog_filter= "Schema Files (*.json)")
         self.addWidget(self.down)
 
     def run_subway_start_page(self):
@@ -56,6 +55,8 @@ class GUIWorkspace(QSplitter):
         self.down.add_tab(SchemaBuilder(), "Schema Builder")
 
     def edit_existing_schema(self,schema):
+        if type(schema) is list:
+            schema=schema[0]
         schema_editor=SchemaBuilder()
         schema_editor.restore(schema)
         self.down.add_tab(schema_editor, "Schema Editor")
