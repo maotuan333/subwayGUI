@@ -1,0 +1,78 @@
+File::.sbx
+Function::blah.m:://umms-crburge.turbo.storage.umich.edu/umms-crburge/Code/AF/newPipeline/blah.m
+File::.ephys
+Function::next_func::.n
+File::_eye_proc.mat
+Function::ReadEyeVidNamesAF.m::null::manual
+File::_dsNidaq.mat
+Function::idk some step::null::manual
+File::_quadrature.mat
+
+        \begin{equation}
+        \begin{split}
+        \end{split}
+        \end{equation}
+
+
+
+1 2 3 4 5 6
+1 2 3 9
+
+tar \
+  --exclude '*__pycache__*' \
+  -czvf submit.tar.gz \
+  html \
+  insta485generator \
+  pyproject.toml
+Cognitive Atlas is a collaborative knowledge-building project that aims to facilitate the use of ontology in cognitive science and neuroscience38 
+
+
+
+tests/test_insta485generator_public.py FF..                                                                      [ 44%]
+tests/test_style.py FFF.                                                                                         [ 55%]
+t
+
+purple-6880A7
+pink-C5ADCB
+C4A2C0
+olive-9BA069
+
+
+
+!!!!!
+trying to run..on T10_20220705_001_dsNidaq.mat -bhv2Convert.m-> T10_220705_bhv.mat
+check the script input. and see what's missing
+
+but i do feel much better about ths project after p1 lol
+
+
+-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+9
+
+Physiology, Genetics, Biochemistry, Behavioral Neuroscience, Learning and Memory, Organized Chemistry, Molecular Biology, Ecology
+
+
+
+
+
+
+
+
+
+
+

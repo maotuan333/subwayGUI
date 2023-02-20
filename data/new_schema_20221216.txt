@@ -1,0 +1,11 @@
+File::_0.txt
+Function::s0.m
+File::_1.docx::_1qc.txt::_1unicorn.png::NOREADME::NOSCRIPT::AUTO
+Function::s1.m
+File::_2.pub::_2qc.txt::NOQCIMG::NOREADME::NOSCRIPT::AUTO
+Function::s2.py
+File::_3.zip::NOQCMETA::_3unicorn.png::NOREADME::NOSCRIPT::AUTO
+Function::s3.m
+File::_4.txt::NOQCMETA::NOQCIMG::C:/Users/damao/PycharmProjects/subway/testfolder/functions/test_redme_of_4.txt::NOSCRIPT::AUTO
+Function::Copy
+File::_4 - Copy.txt::NOQCMETA::NOQCIMG::C:/Users/damao/PycharmProjects/subway/subway config files/Copy readme-7f6a219b-babc-45c4-a6fa-2b6c32f90f0f.txt::NOSCRIPT::MANUAL

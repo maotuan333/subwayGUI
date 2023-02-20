@@ -18,7 +18,6 @@ class Status(Enum):
     # 3. all files are found: button is unclickable, or cli for file viewing;
     # 4. error: the last action failed.
 
-
 # An abstract container that has a button associated with the status of file(s)
 class FileStatusButton(QWidget):
     # Status of the associated file(s)

@@ -1,4 +1,4 @@
-from Config import *
+from config import *
 import sys
 from PyQt6.QtWidgets import QApplication
 from GUI import SubwayGUI

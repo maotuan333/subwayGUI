@@ -1,29 +1,27 @@
-from PyQt6.QtWidgets import (
-    QWidget,QMessageBox,QLabel,QVBoxLayout,QPushButton,QSizePolicy
-)
-from PyQt6.QtCore import Qt
-import os.path
 import glob
+import os.path
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QWidget, QMessageBox, QLabel, QVBoxLayout, QPushButton, QSizePolicy
+)
+
 from Config import *
-from QCDynamic import QCDynamic
+
 
 class NodeDynamic(QWidget):
-    qc = None
-    file_exists = False
-    projected_filepath = ''
-    filepath = ''
-
-    def __init__(self, folder, prefix, suffix, exists=False, script_path=None, qc_suffix=None, readme_path=None, prev_node=None, manual=False):
+    def __init__(self, folder, prefix, suffix, exists=False, script_path=None, readme_path=None, prev_node=None,
+                 manual=False):
         super().__init__()
-        self.fullpath = folder+'/'+prefix+suffix
+        self.fullpath = folder + '/' + prefix + suffix
         self.script_path = script_path
-        self.prev_node=prev_node
-        self.manual=manual
-        self.readme_path=readme_path
+        self.prev_node = prev_node
+        self.manual = manual
+        self.readme_path = readme_path
         layout = QVBoxLayout()
         self.setLayout(layout)
         self.n = QPushButton()
-        #self.n.clicked.connect(self.onclick) - for the purpose of chain reaction this is moved to subwayline
+        # self.n.clicked.connect(self.onclick) - for the purpose of chain reaction this is moved to subwayline
         self.n.setCheckable(True)
         self.n.setFlat(True)
         self.n.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
@@ -36,9 +34,6 @@ class NodeDynamic(QWidget):
             self.set_file_exist()
         else:
             self.refresh()
-        if qc_suffix:
-            self.qc=QCDynamic(folder, prefix, qc_suffix)
-            layout.addWidget(self.qc, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.n, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(QLabel(prefix+suffix))
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -64,8 +59,6 @@ class NodeDynamic(QWidget):
             QMessageBox.warning(self, 'Multiple files found',str)
         else:
             self.set_file_exist()
-        if self.qc:
-            self.qc.refresh()
 
     def onclick(self):
         if not self.file_exists:
@@ -93,8 +86,8 @@ class NodeDynamic(QWidget):
         if self.script_path[-2:] == '.m':
             MATLAB_ENGINE.addpath(os.path.dirname(self.script_path))
             try: #maybe should create matlab eng at beginning of whole program an pass in
-                command=os.path.basename(self.script_path[:-2]) + \
-                        '(\''+self.prev_node.fullpath+'\');'
+                command= os.path.basename(self.script_path[:-2]) + \
+                        '(\'' + self.prev_node.filepath + '\');'
                 MATLAB_ENGINE.eval(command, nargout=0)
             except:
                 pass

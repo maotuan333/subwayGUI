@@ -1,11 +1,10 @@
-from Config import *
-import Config
+from config import *
+import config
 from PyQt6.QtWidgets import (
     QMenuBar, QSplitter, QMainWindow
 )
 from FileSidebar import FileSidebar
 from GUIWorkspace import GUIWorkspace
-from QCViewer import QCViewer
 from PyQt6.QtCore import Qt
 
 
@@ -22,10 +21,6 @@ class SubwayGUI(QMainWindow):
         # menu
         menuBar = QMenuBar()
         self.setMenuBar(menuBar)
-        filesMenu = menuBar.addMenu("&Files")
-        openModulesMenu = menuBar.addMenu("&Open")
-        settingsMenu = menuBar.addMenu("&Settings")
-        helpMenu = menuBar.addMenu("&Help & Contact")
 
         # main window
         splitter = QSplitter()
@@ -34,12 +29,8 @@ class SubwayGUI(QMainWindow):
         splitter.addWidget(self.fileSidebar)
         self.mainWorkspace = GUIWorkspace()
         splitter.addWidget(self.mainWorkspace)
-        self.qcViewer = QCViewer()
-        Config.GLOBAL_QC_HANDLE=self.qcViewer
-        splitter.addWidget(self.qcViewer)
-        splitter.setSizes([(int)(splitter.size().width() * 0.25),
-                           (int)(splitter.size().width() * 0.7),
-                           (int)(splitter.size().width() * 0.05)])
+        splitter.setSizes([(int)(splitter.size().width() * 0.3),
+                           (int)(splitter.size().width() * 0.7)])
 
         # round up
         self.setCentralWidget(splitter)
