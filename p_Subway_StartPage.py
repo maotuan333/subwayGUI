@@ -60,13 +60,14 @@ class SubwayStartPage(QWidget):
 
     def get_workspace_info(self):
         folders = self.folder_button.return_info()
-        schema = self.schema_button.return_info()[0]
+        schema = self.schema_button.return_info()
         if not folders:
             QMessageBox.warning(self, 'Warning', 'Please select work folder(s)!')
             return
         if not schema:
             QMessageBox.warning(self, 'Warning', 'Please select a schema!')
             return
+        schema=schema[0]
         info=dict(header='Configuration of last subwayGUI run',
                    folders=folders,
                    schema=schema)

@@ -1,3 +1,0 @@
-File::0.txt
-Function::func
-File::1.docx::SPACER::_my_unicorn.jpg::NOREADME::NOSCRIPT

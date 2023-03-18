@@ -4,6 +4,9 @@ test/
 data/
 archive/
 *.m
+subwayGUI/
+.idea/
 venv/
 dist/
 build/
+subwaygui.log

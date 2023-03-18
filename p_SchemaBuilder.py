@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 import json
-from model import schema_reader,schema_writer,update_json,yes_no
+from util import schema_reader,schema_writer,update_json,yes_no
 from static import data_schema
 
 # A canvas for building schemas (rules of file trains) that will be used to find files

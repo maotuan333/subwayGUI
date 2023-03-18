@@ -129,3 +129,7 @@ class FileStatusButton(QWidget):
         self.set_failed() if set_fail else self.set_file_not_found()
         # No files were generated. You can either leave the button in default or set its state
         # to failed by specifying 'set_fail'.
+
+    def set_filepath(self,filepath):
+        self.filepath=filepath
+        self.refresh()

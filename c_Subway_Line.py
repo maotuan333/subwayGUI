@@ -14,6 +14,7 @@ class SubwayLine(QWidget):
     def __init__(self, schema, start_file,schema_path):
         super().__init__()
         self.schema_path=schema_path
+        self.start_file=start_file
 
         # Create main layout
         self.layout = QVBoxLayout(self)
@@ -31,7 +32,7 @@ class SubwayLine(QWidget):
         self.subway_layout = QHBoxLayout()
 
         # Add node for start file
-        first_node = DynamicStartFile(folder=self.folder, prefix=self.prefix, suffix=start_file_suffix)
+        first_node = DynamicStartFile(folder=self.folder, filename=start_file.name)
         self.subway_layout.addWidget(first_node)
 
         # Add each following step
@@ -64,10 +65,12 @@ class SubwayLine(QWidget):
     def add_step(self, data):
         i=self.i
         data.pos=i-1
+        prev_filepath=self.subway_layout.itemAt(i-1).widget().filepath
         step = DynamicStepUnit(folder=self.folder,
                               prefix=self.prefix,
                               data=data,
-                               schema=self.schema_path)
+                               schema=self.schema_path,
+                               prev_filepath=prev_filepath)
         self.subway_layout.addWidget(step)
         # Record current index of step for file generation
         step.node.button.clicked.connect(lambda: self.onclick(i))
@@ -82,11 +85,13 @@ class SubwayLine(QWidget):
 
     # Refresh all the files in subway.
     def refresh(self):
+        print('Refreshed subway line:',self.start_file)
         # Refresh each file
-        for step in self.subway_layout.children().widget():
+        for i in range(self.subway_layout.count()):
+            step=self.subway_layout.itemAt(i).widget()
             step.refresh()
         # If the start file no longer exists, this subway line is no longer considered valid.
-        if not self.layout.itemAt(0).file_exists():
+        if not self.subway_layout.itemAt(0).widget().file_exists():
             qm=QMessageBox.StandardButton
             # Ask user if they want to delete this subway line
             msg='The start file for \''+self.prefix+'  \' no longer exists. Close the subwayline?'

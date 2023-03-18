@@ -8,53 +8,26 @@ from PyQt6.QtWidgets import (
 )
 
 from config import *
-from model import yes_no,schema_writer
+from util import yes_no,schema_writer,filename_extract,filename_match,autowrap
 from static import FunctionArrow
 from w_FileStatusButton import *
 
 ALIGN_CENTER = Qt.AlignmentFlag.AlignCenter
 
-
-# A widget representing the first file of a schema.
-class DynamicStartFile(QWidget):
-    def __init__(self, folder, prefix, suffix):
-        super().__init__()
-        self.label = prefix + suffix
-        self.filepath = folder / self.label
-
-        # create layout
-        self.layout = QGridLayout()
-        self.setLayout(self.layout)
-
-        self.node = FileStatusButton(filepath=self.filepath,
-                                     img_not_found=ASSETS_FOLDER / "node_default.png",
-                                     img_found=ASSETS_FOLDER / "node_success.png")
-        self.layout.addWidget(self.node, 0, 1)
-        self.format_node()
-
-    # UI of node
-    def format_node(self):
-        layout = QVBoxLayout()
-        layout.addWidget(self.node.button, alignment=ALIGN_CENTER)
-        layout.addWidget(QLabel(self.label), alignment=ALIGN_CENTER)
-        self.node.setLayout(layout)
-
-        # Format button
-        self.node.button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-
-    def file_exists(self):
-        return self.node.files_status != Status.FOUND
-
 # A widget representing all elements of a processing step:
 # a function arrow and a button for the file to be generated.
 class DynamicStepUnit(QWidget):
-    def __init__(self, folder, prefix, data, schema):
+    def __init__(self, folder, prefix, data, schema, prev_filepath):
         super().__init__()
+        self.prefix=prefix
+        self.folder=folder
         self.schema=schema
         self.data = data
-        self.filename = prefix + self.data.output.show_text
-        self.filepath = folder / (prefix + self.data.output.show_text)
-        self.prev_filepath = folder / (prefix + self.data.input.show_text)
+        self.identifier=self.data.output.show_text
+        self.show_text = autowrap(prefix + self.identifier)
+        self.filepath = folder / (prefix + self.identifier)
+        self.prev_filepath = prev_filepath
+        self.show_text_label = QLabel(self.show_text)
 
         # create layout
         self.layout = QGridLayout()
@@ -62,7 +35,29 @@ class DynamicStepUnit(QWidget):
         # draw function arrow
         self.layout.addWidget(FunctionArrow(self.data.func.show_text), 1, 0)
         # draw node
+        # try a simple filename search
         self.add_node()
+
+        # if file not found, run an ambiguous search
+        if not self.file_exists():
+            self.ambiguous_search()
+
+        self.set_node_layout()
+
+    def set_node_layout(self):
+        # Add to lower right slot
+        self.layout.addWidget(self.node, 1, 1)
+
+        # Create layout around node
+        layout = QVBoxLayout()
+        layout.addWidget(self.node.button, alignment=ALIGN_CENTER)
+        layout.addWidget(self.show_text_label, alignment=ALIGN_CENTER)
+        self.node.setLayout(layout)
+
+        # Format node UI
+        self.node.button.setCheckable(True)  # TODO
+        self.node.button.setFlat(True)  # TODO
+        self.node.button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
 
     # UI of node
     def add_node(self):
@@ -73,19 +68,6 @@ class DynamicStepUnit(QWidget):
                                      img_failed=ASSETS_FOLDER / "node_failed.png",
                                      msg_failed="Failed to generate file: " + str(self.filepath)
                                                 + " by running " + self.data.func.filepath)
-        # Add to lower right slot
-        self.layout.addWidget(self.node, 1, 1)
-
-        # Create layout around node
-        layout = QVBoxLayout()
-        layout.addWidget(self.node.button, alignment=ALIGN_CENTER)
-        layout.addWidget(QLabel(self.filename), alignment=ALIGN_CENTER)
-        self.node.setLayout(layout)
-
-        # Format node UI
-        self.node.button.setCheckable(True)  # TODO
-        self.node.button.setFlat(True)  # TODO
-        self.node.button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
 
     # Wrapper for generating output file on click
     def onclick(self):
@@ -174,6 +156,58 @@ class DynamicStepUnit(QWidget):
         return self.node.files_status == Status.FOUND
 
     # Update node files status
+    def refresh(self, set_fail=False):
+        self.node.refresh(set_fail=set_fail)
+        if not self.file_exists():
+            self.ambiguous_search()
+
+    def ambiguous_search(self):
+        parts = filename_extract(self.prefix)
+        potential_file = filename_match(self.folder, self.identifier, parts)
+        if potential_file:
+            self.filepath = potential_file
+            self.show_text = autowrap(pathlib.Path(potential_file).name)
+            self.node.set_filepath(self.filepath)
+            self.update_label(found=True)
+        else:
+            self.update_label(found=False)
+
+    def update_label(self,found):
+        text = self.show_text if found else f"[Missing] *{self.identifier}"
+        self.show_text_label.setText(text)
+
+
+# A widget representing the first file of a schema.
+class DynamicStartFile(QWidget):
+    def __init__(self, folder, filename):
+        super().__init__()
+        self.label=autowrap(filename)
+        self.filepath = folder / filename
+
+        # create layout
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
+
+        self.node = FileStatusButton(filepath=self.filepath,
+                                     img_not_found=ASSETS_FOLDER / "node_default.png",
+                                     img_found=ASSETS_FOLDER / "node_success.png")
+        self.layout.addWidget(self.node, 0, 1)
+        self.format_node()
+
+
+    # UI of node
+    def format_node(self):
+        layout = QVBoxLayout()
+        layout.addWidget(self.node.button, alignment=ALIGN_CENTER)
+        layout.addWidget(QLabel(self.label), alignment=ALIGN_CENTER)
+        self.node.setLayout(layout)
+
+        # Format button
+        self.node.button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+
+    def file_exists(self):
+        return self.node.files_status == Status.FOUND
+
     def refresh(self, set_fail=False):
         self.node.refresh(set_fail=set_fail)
 
@@ -316,6 +350,7 @@ class FunctionConfigDialog(QDialog):
                 val = self.param_at(i).value.text()
                 command += (' ' + val)
         self.command_text.setText(command)
+
 
 class Header(QWidget):
     def __init__(self, input, value, checkbox):

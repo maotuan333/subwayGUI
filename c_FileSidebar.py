@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (
-    QTreeView, QAbstractItemView
+    QTreeView, QAbstractItemView,
 )
 from PyQt6.QtGui import QFileSystemModel
 

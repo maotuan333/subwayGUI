@@ -10,7 +10,7 @@ from PyQt6.QtCore import (
     Qt, pyqtSlot, pyqtSignal
 )
 import pathlib
-from model import schema_reader
+from util import schema_reader
 
 
 # Main window for subway lines
