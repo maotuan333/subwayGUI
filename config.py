@@ -2,13 +2,14 @@ import pathlib
 import sys
 import os
 import logging
+import datetime
 
 debug = True
 
-logging.basicConfig(filename='subwaygui.log', level=logging.NOTSET)
+logging.basicConfig(filename='subwaygui_log.log', level=logging.NOTSET)
 logging.root.setLevel(logging.NOTSET)
 logger = logging.getLogger("app")
-logger.info("subway gui started...")
+logger.info("subway gui started...",)
 
 PROJECT_PATH = pathlib.Path(os.path.dirname(os.path.abspath(sys.argv[0])))
 PROGRAM_FILES_FOLDER = PROJECT_PATH / 'data'
