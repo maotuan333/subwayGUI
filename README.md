@@ -15,11 +15,13 @@
 <p float="left">
 <img width="300" alt="overall schema" src="https://user-images.githubusercontent.com/80687346/214458451-e9af97db-cee1-4b37-9138-ee3697302777.png"/>
 <img width="600" alt="schema builder design" src="https://user-images.githubusercontent.com/80687346/214458551-32c90746-8677-49a0-b5d6-3704d0ba8e72.png"/></p>
+
 ### Current Interface:
 
 This is the first version in use - more bug fixes and updates coming soon
 
-![image-20230331172117450](C:\Users\damao\AppData\Roaming\Typora\typora-user-images\image-20230331172117450.png)
+![image-20230331172117450](https://user-images.githubusercontent.com/80687346/229245566-d3425ada-3064-48c2-acdb-73962bb75228.png)
+
 =======
 
 
