@@ -1,6 +1,14 @@
 # subwayGUI
 
 ### [beta version demo (1min)](https://drive.google.com/file/d/1UIVzM4W5C5yggjuARPqGQmIT5MTb1Pwq/view?usp=sharing)
+
+How to run:
+
+1. Download dist.zip
+2. unzip in local folder
+3. click main.exe
+
+
 Current:
 -organize & track experiment files
 
@@ -33,10 +41,4 @@ dist\main # run .exe
 ```
 
 
-
-How to run:
-
-1. Download dist.zip
-2. unzip in local folder
-3. click main.exe
 
