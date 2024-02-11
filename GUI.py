@@ -8,11 +8,11 @@ from PyQt6.QtWidgets import (
     QSplitter, QFileDialog
 )
 
-from c_FileSidebar import FileSidebar
-from p_SchemaBuilder import SchemaBuilder
-from p_Subway_Container import Subway
-from p_Subway_StartPage import SubwayStartPage
-from w_TabbedWorkspace import TabbedWorkspace
+from components.FileSidebar import FileSidebar
+from panels.SchemaBuilder import SchemaBuilder
+from panels.Subway_Container import Subway
+from panels.Subway_StartPage import SubwayStartPage
+from widgets.TabbedWorkspace import TabbedWorkspace
 from config import *
 
 
@@ -105,11 +105,11 @@ class GUIWorkspace(QSplitter):
 '''
 Some rules for sorting out file paths...
 
-work_folder: 'C:/absolute_path/exp_folder' - maximum common filepath of all files in the subway system
-subway_folder: '/collection_of_files/yymmdd_Exp_00x' - excluding work_folder, lowest common ancestor of all files in one subway line
-start_file = 'C:/absolute_path/exp_folder/collection_of_files/yymmdd_Exp_00x_start_file.ext'
-subway_folder = 'C:/absolute_path/exp_folder/collection_of_files'
-subway_prefix: 'yymmdd_Exp_00x' - maximum common prefix of all files in one subway line. 
+work_folder: 'C:/absolute_path/ex..panels.folder' - maximum common filepath of all files in the subway system
+subway_folder: '/collection_of_files/yymmdd_Ex..panels.00x' - excluding work_folder, lowest common ancestor of all files in one subway line
+start_file = 'C:/absolute_path/ex..panels.folder/collection_of_files/yymmdd_Ex..panels.00x_start_file.ext'
+subway_folder = 'C:/absolute_path/ex..panels.folder/collection_of_files'
+subway_prefix: 'yymmdd_Ex..panels.00x' - maximum common prefix of all files in one subway line. 
                                     used for display purposes (as title of the subway line)
 prev_suffix: '_1st_step.ext1'
 my_suffix: '_2nd_step.ext2'
