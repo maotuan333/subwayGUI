@@ -1,0 +1,104 @@
+[
+    {
+     "input": {
+      "show_text": ".sbx",
+      "filepath": ".sbx"
+     },
+     "func": {
+      "show_text": "readSbxEphysCheck.m",
+      "filepath": "//umms-crburge.turbo.storage.umich.edu/umms-crburge/Code/AF/newPipeline/pipe.cb/functions/readSbxEphysCheck.m",
+      "is_manual": false,
+      "been_run": false
+     },
+     "output": {
+      "show_text": "_dsNidaq.mat",
+      "filepath": "_dsNidaq.mat"
+     },
+     "readme": {
+      "show_text": null,
+      "filepath": null
+     },
+     "pos": 0,
+     "shape": {}
+    },
+    {
+     "input": {
+      "show_text": "_dsNidaq.mat",
+      "filepath": "_dsNidaq.mat"
+     },
+     "func": {
+      "show_text": "bhv2Convert.m",
+      "filepath": "//umms-crburge.turbo.storage.umich.edu/umms-crburge/Code/AF/newPipeline/pipe.cb/functions/bhv2Convert.m",
+      "is_manual": false,
+      "been_run": false
+     },
+     "output": {
+      "show_text": "_bhv.mat",
+      "filepath": "_bhv.mat"
+     },
+     "readme": {
+      "show_text": null,
+      "filepath": null
+     }
+    },
+    {
+     "input": {
+      "show_text": "_bhv.mat",
+      "filepath": "_bhv.mat"
+     },
+     "func": {
+      "show_text": "writeVid.m",
+      "filepath": "//umms-crburge.turbo.storage.umich.edu/umms-crburge/Code/AF/newPipeline/pipe.cb/functions/writeVid.m",
+      "is_manual": false,
+      "been_run": false
+     },
+     "output": {
+      "show_text": "_eye.avi",
+      "filepath": "_eye.avi"
+     },
+     "readme": {
+      "show_text": null,
+      "filepath": null
+     }
+    },
+    {
+     "input": {
+      "show_text": "_eye.avi",
+      "filepath": "_eye.avi"
+     },
+     "func": {
+      "show_text": "suite2p",
+      "filepath": "suite2p",
+      "is_manual": true,
+      "been_run": false
+     },
+     "output": {
+      "show_text": "Fall.mat",
+      "filepath": "Fall.mat"
+     },
+     "readme": {
+      "show_text": "suite2p.txt",
+      "filepath": "C:/Users/damao/Documents/lab/suite2p.txt"
+     }
+    },
+    {
+     "input": {
+      "show_text": "Fall.mat",
+      "filepath": "Fall.mat"
+     },
+     "func": {
+      "show_text": "dffCalc.m",
+      "filepath": "//umms-crburge.turbo.storage.umich.edu/umms-crburge/Code/AF/newPipeline/pipe.cb/functions/dffCalc.m",
+      "is_manual": false,
+      "been_run": false
+     },
+     "output": {
+      "show_text": "_Suite2p_dff.mat",
+      "filepath": "_Suite2p_dff.mat"
+     },
+     "readme": {
+      "show_text": null,
+      "filepath": null
+     }
+    }
+   ]
