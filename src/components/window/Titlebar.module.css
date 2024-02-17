@@ -1,0 +1,21 @@
+.Container {
+    display: flex;
+    justify-content: center;
+}
+
+.ActionButton {
+    width: 15rem;
+    height: 10rem;
+}
+
+.WindowButtonGroup {
+
+}
+
+.WindowButton {
+    padding: 0.5rem 0.75rem;
+}
+
+.WindowButton:hover {
+    background-color: #565656;
+}

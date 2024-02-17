@@ -4,13 +4,33 @@ import styles from "./Titlebar.module.css";
 import WindowMinimize from "../icons/WindowMinimize";
 import WindowRestore from "../icons/WindowRestore";
 import WindowClose from "../icons/WindowClose";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Logo from '../../assets/svg/subway.svg?react'
 
 function Titlebar() {
 
     const [isMaximized, setIsMaximized] = useState(false);
-
+    
+    const updateIsWindowMaximized = useCallback(async () => {
+        const resolvedPromise = await appWindow.isMaximized();
+        setIsMaximized(resolvedPromise);
+    }, []);
+    
+    useEffect(() => {
+        updateIsWindowMaximized();
+    
+        let unlisten = undefined;
+    
+        const listen = async () => {
+            unlisten = await appWindow.onResized(() => {
+                updateIsWindowMaximized();
+            });
+        };
+    
+        listen();
+    
+        return () => unlisten && unlisten();
+    }, [updateIsWindowMaximized]);
     const toggleMaximized = () => {
         const fetchMaximizedStatus = async () => {
             const isMax = await appWindow.isMaximized();
@@ -24,8 +44,8 @@ function Titlebar() {
         <div className={`h-full bg-[#1E1E1E] ${isMaximized ? 'rounded-none' : 'rounded-xl border-[1px] border-[#444444]'}`}>
             <div data-tauri-drag-region className={`w-full bg-[#1E1E1E] flex justify-between items-center 
             ${isMaximized ? 'rounded-none' : 'rounded-t-xl'}`}>
-                <div className="">
-                    <Logo width={32} height={32} />
+                <div data-tauri-drag-region className="">
+                    <Logo data-tauri-drag-region width={32} height={32} />
                 </div>
                 <div className={`${styles.WindowButtonGroup} flex`}>
                     <button className={styles.WindowButton} onClick={() => appWindow.minimize()}>
