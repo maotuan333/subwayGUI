@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": ".",
-    "version": "0.0.0"
+    "productName": "SubwayGUI",
+    "version": "0.0.1"  
   },
   "tauri": {
     "allowlist": {
@@ -15,10 +15,23 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "setFullscreen": true,
+        "startDragging": true
       }
     },
     "windows": [
       {
+        "decorations": false,
         "fullscreen": false,
         "resizable": true,
         "title": "subwaygui",
@@ -32,7 +45,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.subwaygui.dev",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
