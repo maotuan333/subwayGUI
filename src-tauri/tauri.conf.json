@@ -10,6 +10,7 @@
     "version": "0.0.1"  
   },
   "tauri": {
+    "macOSPrivateApi": true,
     "allowlist": {
       "all": false,
       "shell": {
@@ -17,26 +18,21 @@
         "open": true
       },
       "window": {
-        "all": false,
-        "close": true,
-        "hide": true,
-        "show": true,
-        "maximize": true,
-        "minimize": true,
-        "unmaximize": true,
-        "unminimize": true,
-        "setFullscreen": true,
-        "startDragging": true
+        "all": true
       }
     },
     "windows": [
       {
+        "transparent": true,
         "decorations": false,
         "fullscreen": false,
         "resizable": true,
         "title": "subwaygui",
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
         "width": 800,
-        "height": 600
+        "height": 600,
+        "maximized": true
       }
     ],
     "security": {
