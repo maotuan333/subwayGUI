@@ -1,7 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { ReactNode } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import NewTabIcon from '../assets/svg/new-tab-icon.svg?react'
 import SchemaBuilderIcon from '../assets/svg/schema-builder-icon.svg?react'
 
@@ -10,7 +10,6 @@ type Tab = {
   label: string;
   route: string;
   active: boolean;
-  icon: ReactNode;
 };
 
 interface TabState {
@@ -27,18 +26,22 @@ const RouteToTabMap = {
     label: "New page",
     route: "/",
     active: true,
-    icon: <NewTabIcon className="min-w-[16px]" />
   }),
   '/schema/create': () => ({
     id: uuidv4(),
     label: "Schema Builder",
     route: "/schema/create",
     active: true,
-    icon: <SchemaBuilderIcon className="min-w-[16px]" />
   })
 }
 
-export const useTabStore = create<TabState>((set, get) => ({
+
+export const TabToIcon = {
+  '/': <NewTabIcon className="min-w-[16px]" />,
+  '/schema/create': <SchemaBuilderIcon className="min-w-[16px]" />
+}
+
+export const useTabStore = create<TabState>()(persist((set, get) => ({
   // initial state
   tabs: [
     RouteToTabMap["/"]()
@@ -58,13 +61,7 @@ export const useTabStore = create<TabState>((set, get) => ({
     set((state) => {
       const openTabs = state.tabs.filter((tab) => tab.id !== id);
       if (openTabs.length == 0) {
-        openTabs.push({
-          id: uuidv4(),
-          label: "New Page",
-          route: "/",
-          active: false,
-          icon: <NewTabIcon className="min-w-[16px]" />
-        })
+        openTabs.push(RouteToTabMap["/"]())
       }
       if (
         openTabs.filter((tab) => tab.active == true).length == 0
@@ -87,4 +84,9 @@ export const useTabStore = create<TabState>((set, get) => ({
     const tabs = get().tabs;
     return tabs.find((obj) => obj.active === true);
   },
-}));
+}), {
+  name: 'tab-storage',
+}
+
+
+));

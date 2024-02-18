@@ -1,11 +1,10 @@
 /// <reference types="vite-plugin-svgr/client" />
 import styles from "./Tabs.module.css";
 import PlusIcon from '../../assets/svg/plus.svg?react'
-import NewTabIcon from '../../assets/svg/new-tab-icon.svg?react'
 import CloseTabIcon from '../../assets/svg/close.svg?react'
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useTabStore } from "../../stores/tabs";
+import { TabToIcon, useTabStore } from "../../stores/tabs";
 
 function Tabs() {
 
@@ -13,6 +12,7 @@ function Tabs() {
 
     const { addTab, removeTab, setActive, getActive, tabs } = useTabStore();
     useEffect(() => {
+        console.log(tabs)
         const activeTab = getActive();
         if (activeTab) {
             navigate(activeTab.route);
@@ -33,7 +33,7 @@ function Tabs() {
                             }}
                         >
                             <div className="flex items-center gap-1.5">
-                                {tab.icon}
+                                {TabToIcon[tab.route]}
                                 <h6 className="text-[12px] font-semibold truncate">{tab.label}</h6>
                             </div>
                             <button className={`p-1 hover:bg-[#464646] rounded-md ${!tab?.active ? 'invisible group-hover:visible' : ''}`}
