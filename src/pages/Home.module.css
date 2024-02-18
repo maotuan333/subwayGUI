@@ -1,0 +1,9 @@
+.Container {
+    display: flex;
+    justify-content: center;
+}
+
+.ActionButton {
+    width: 15rem;
+    height: 10rem;
+}

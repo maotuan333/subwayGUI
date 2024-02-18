@@ -9,42 +9,36 @@ import Logo from '../../assets/svg/subway.svg?react'
 
 function Titlebar() {
 
-    const [isMaximized, setIsMaximized] = useState(false);
-    
-    const updateIsWindowMaximized = useCallback(async () => {
-        const resolvedPromise = await appWindow.isMaximized();
-        setIsMaximized(resolvedPromise);
+    const [isFocused, setIsFocused] = useState(false);
+
+    const updateIsWindowFocused = useCallback(async () => {
+        const resolvedPromise = await appWindow.isFocused();
+        setIsFocused(resolvedPromise);
     }, []);
-    
+
     useEffect(() => {
-        updateIsWindowMaximized();
-    
+        updateIsWindowFocused();
         let unlisten = undefined;
-    
         const listen = async () => {
-            unlisten = await appWindow.onResized(() => {
-                updateIsWindowMaximized();
-            });
+            unlisten = await appWindow.onFocusChanged(() => {
+                updateIsWindowFocused();
+            })
         };
-    
         listen();
-    
         return () => unlisten && unlisten();
-    }, [updateIsWindowMaximized]);
+    }, [updateIsWindowFocused]);
+
     const toggleMaximized = () => {
         const fetchMaximizedStatus = async () => {
             const isMax = await appWindow.isMaximized();
-            setIsMaximized(!isMax);
             isMax ? appWindow.unmaximize() : appWindow.maximize();
         };
         fetchMaximizedStatus();
     }
 
     return (
-        <div className={`h-full bg-[#1E1E1E] ${isMaximized ? 'rounded-none' : 'rounded-xl border-[1px] border-[#444444]'}`}>
-            <div data-tauri-drag-region className={`w-full bg-[#1E1E1E] flex justify-between items-center 
-            ${isMaximized ? 'rounded-none' : 'rounded-t-xl'}`}>
-                <div data-tauri-drag-region className="">
+            <div data-tauri-drag-region className={`w-full flex justify-between items-center ${isFocused ? 'bg-[#3C3C3C]' : 'bg-[#323233]'}`}>
+                <div data-tauri-drag-region className="ml-0.5">
                     <Logo data-tauri-drag-region width={32} height={32} />
                 </div>
                 <div className={`${styles.WindowButtonGroup} flex`}>
@@ -59,7 +53,6 @@ function Titlebar() {
                     </button>
                 </div>
             </div>
-        </div>
     );
 }
 
