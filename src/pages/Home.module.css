@@ -1,9 +1,21 @@
 .Container {
     display: flex;
     justify-content: center;
+    align-items: start;
+    padding-top: 10%;
 }
 
 .ActionButton {
-    width: 15rem;
-    height: 10rem;
+    width: 20rem;
+    height: 12.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+}
+
+.ActionButton:hover {
+    border: 1px solid #c4c4c4;
 }

@@ -13,9 +13,11 @@ interface TabState {
   addTab: (route: string, label: string) => void;
   removeTab: (id: string) => void;
   setActive: (id: string) => void;
+  getActive: () => Tab;
 }
 
-export const useTabStore = create<TabState>((set) => ({
+
+export const useTabStore = create<TabState>((set, get) => ({
   // initial state
   tabs: [],
   // methods for manipulating state
@@ -35,11 +37,14 @@ export const useTabStore = create<TabState>((set) => ({
   removeTab: (id) => {
     set((state) => {
       const openTabs = state.tabs.filter((tab) => tab.id !== id);
-      if(openTabs.length != 0 && openTabs.filter((tab) => tab.active == true).length == 0) {
+      if (
+        openTabs.length != 0 &&
+        openTabs.filter((tab) => tab.active == true).length == 0
+      ) {
         openTabs[0].active = true;
       }
       return {
-        tabs: openTabs
+        tabs: openTabs,
       };
     });
   },
@@ -50,4 +55,8 @@ export const useTabStore = create<TabState>((set) => ({
       ),
     }));
   },
+  getActive: () => {
+    const tabs = get().tabs;
+    return tabs.find(obj => obj.active === true);
+  }
 }));
