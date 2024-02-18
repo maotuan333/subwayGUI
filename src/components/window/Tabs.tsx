@@ -1,16 +1,23 @@
 /// <reference types="vite-plugin-svgr/client" />
 import styles from "./Tabs.module.css";
 import PlusIcon from '../../assets/svg/plus.svg?react'
-import { useTabStore } from "../../stores/tabs";
 import NewTabIcon from '../../assets/svg/new-tab-icon.svg?react'
 import CloseTabIcon from '../../assets/svg/close.svg?react'
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useTabStore } from "../../stores/tabs";
 
 function Tabs() {
 
     const navigate = useNavigate();
 
-    const { addTab, removeTab, setActive, tabs } = useTabStore();
+    const { addTab, removeTab, setActive, getActive, tabs } = useTabStore();
+    useEffect(() => {
+        const activeTab = getActive();
+        if (activeTab) {
+            navigate(activeTab.route);
+        }
+    }, [tabs, navigate, getActive]);
 
     // 2D2D2D
     // 1E1E1E
@@ -20,16 +27,16 @@ function Tabs() {
                 tabs.map(tab => {
                     return (
                         <div key={tab.id} className={`group flex h-full items-center border-r-[1px] border-[#1E1E1E] gap-2 px-2 pr-3 
-                                font-sans ${tab.active ? 'bg-[#1E1E1E] ' : 'bg-[#2D2D2D]'} hover:cursor-pointer min-w-[8rem]  overflow`}
+                                font-sans ${tab?.active ? 'bg-[#1E1E1E] ' : 'bg-[#2D2D2D]'} hover:cursor-pointer min-w-[8rem] overflow justify-between`}
                             onClick={() => {
-                                !tab.active ? setActive(tab.id) : null;
-                                console.log(tab.route);
-                                navigate(tab.route);
+                                !tab?.active ? setActive(tab.id) : null;
                             }}
                         >
-                            <NewTabIcon className="min-w-[16px]" />
-                            <h6 className="text-[12px] font-semibold truncate">{tab.label}</h6>
-                            <button className={`p-1 hover:bg-[#464646] rounded-md ${!tab.active ? 'invisible group-hover:visible' : ''}`}
+                            <div className="flex items-center gap-1.5">
+                                {tab.icon}
+                                <h6 className="text-[12px] font-semibold truncate">{tab.label}</h6>
+                            </div>
+                            <button className={`p-1 hover:bg-[#464646] rounded-md ${!tab?.active ? 'invisible group-hover:visible' : ''}`}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     removeTab(tab.id);
@@ -41,12 +48,16 @@ function Tabs() {
                     )
                 })
             }
-            <button className="p-3 h-full hover:bg-[#2D2D2D]" onClick={() => {
-                addTab("/new", "New page");
-                navigate('/new')
-            }}>
-                <PlusIcon />
-            </button>
+            {
+                getActive()?.route !== '/' ?
+                    <button className="p-3 h-full hover:bg-[#2D2D2D]" onClick={() => {
+                        addTab("/");
+                    }}>
+
+                        <PlusIcon />
+                    </button>
+                    : ''
+            }
         </div>
     );
 }

@@ -44,7 +44,7 @@ function App() {
     <div className={`h-full bg-[#1E1E1E] overflow-hidden ${isMaximized ? 'rounded-none' : 'rounded-xl border-[1px] border-[#444444]'}`}>
       <Routes>
         <Route element={<Layout />} >
-          <Route path="/new" element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/schema/create" element={<SchemaBuilder />} />
           <Route path="*" element={<Missing />} />
         </Route>

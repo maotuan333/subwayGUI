@@ -1,15 +1,15 @@
 /// <reference types="vite-plugin-svgr/client" />
 import styles from "./Home.module.css";
 import PlusIcon from '../assets/svg/plus.svg?react'
-import { useNavigate } from "react-router-dom";
+import { useTabStore } from "../stores/tabs";
 
 function Home() {
 
-    const navigate = useNavigate();
+    const { addTab } = useTabStore();
 
     return (
         <div className={`${styles.Container} h-full gap-6`}>
-            <button className={`${styles.ActionButton} bg-[#0C8CE9]`} onClick={() => navigate('/schema/create')}>
+            <button className={`${styles.ActionButton} bg-[#0C8CE9]`} onClick={() => addTab('/schema/create')} >
                 <div className="p-2 bg-[#0A6DC2] rounded-3xl">
                     <PlusIcon width={20} height={20} />
                 </div>
