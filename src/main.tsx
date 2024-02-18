@@ -8,7 +8,6 @@ import { appWindow } from "@tauri-apps/api/window";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <Titlebar />
     <HashRouter>
       <Routes>
         <Route path="/*" element={<App />} />
