@@ -3,6 +3,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import Editor from '@monaco-editor/react';
 import { useRef } from "react";
 import DnDFlow from "./components/canvas/ReactFlowDnd";
+import FolderTree from "./components/folder-tree/FolderTree";
 
 function App() {
   const editorRef = useRef(null);
@@ -14,6 +15,9 @@ function App() {
   return (
     <div style={{ display: 'flex' }}>
       <PanelGroup direction="horizontal">
+        <Panel defaultSize={50} minSize={30}>
+          <FolderTree />
+        </Panel>
         <Panel defaultSize={50} minSize={30}>
           <Editor
             height="90vh"

@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "yarn dev",
-    "beforeBuildCommand": "yarn build",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist"
   },
@@ -12,6 +12,13 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "path": {
+        "all": true
+      },
+      "fs": {
+        "all": true,
+        "scope": ["$DESKTOP/subwayGUI_data", "$DESKTOP/subwayGUI_data/*"]
+      },
       "shell": {
         "all": false,
         "open": true
