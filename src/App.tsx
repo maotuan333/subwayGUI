@@ -1,6 +1,6 @@
 import { Routes, Route, Outlet } from "react-router-dom";
 import SchemaBuilder from "./pages/SchemaBuilder";
-import Missing from "./components/router/Missing"
+import Missing from "./components/router/Missing";
 import Home from "./pages/Home";
 import Titlebar from "./components/window/Titlebar";
 import { useCallback, useEffect, useState } from "react";
@@ -8,7 +8,6 @@ import { appWindow } from "@tauri-apps/api/window";
 import Tabs from "./components/window/Tabs";
 
 function App() {
-
   const [isMaximized, setIsMaximized] = useState(false);
 
   const updateIsWindowMaximized = useCallback(async () => {
@@ -22,7 +21,7 @@ function App() {
     const listen = async () => {
       unlisten = await appWindow.onResized(() => {
         updateIsWindowMaximized();
-      })
+      });
     };
     listen();
     return () => unlisten && unlisten();
@@ -41,14 +40,16 @@ function App() {
   };
 
   return (
-    <div className={`h-full bg-[#1E1E1E] overflow-hidden ${isMaximized ? 'rounded-none' : 'rounded-xl border-[1px] border-[#444444]'}`}>
+    <div
+      className={`h-full bg-[#1E1E1E] overflow-hidden ${isMaximized ? "rounded-none" : "rounded-xl border-[1px] border-[#444444]"}`}
+    >
       <Routes>
-        <Route element={<Layout />} >
+        <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/schema/create" element={<SchemaBuilder />} />
           <Route path="*" element={<Missing />} />
         </Route>
-      </Routes >
+      </Routes>
     </div>
   );
 }

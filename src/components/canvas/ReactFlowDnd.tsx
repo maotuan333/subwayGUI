@@ -1,22 +1,26 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef } from "react";
 import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
   useReactFlow,
   ReactFlowProvider,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+} from "reactflow";
+import "reactflow/dist/style.css";
 
-import './index.css';
+import "./index.css";
+import SchemaNode from "./SchemaNode";
+
+const nodeTypes = { schemaNode: SchemaNode };
 
 const initialNodes = [
   {
-    id: '0',
-    type: 'input',
-    data: { label: 'Node' },
+    id: "0",
+    type: "schemaNode", //'input' for old version
+    data: { label: "SchemaNode" },
+    //TODO !Need to raise state up, considering that nodes will be dynamic
     position: { x: 0, y: 50 },
-    style: { borderRadius: '50px'}
+    style: { borderRadius: "50px" },
   },
 ];
 
@@ -29,14 +33,11 @@ const AddNodeOnEdgeDrop = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { screenToFlowPosition } = useReactFlow();
-  const onConnect = useCallback(
-    (params) => {
-      // reset the start node on connections
-      connectingNodeId.current = null;
-      setEdges((eds) => addEdge(params, eds))
-    },
-    [],
-  );
+  const onConnect = useCallback((params) => {
+    // reset the start node on connections
+    connectingNodeId.current = null;
+    setEdges((eds) => addEdge(params, eds));
+  }, []);
 
   const onConnectStart = useCallback((_, { nodeId }) => {
     connectingNodeId.current = nodeId;
@@ -46,7 +47,7 @@ const AddNodeOnEdgeDrop = () => {
     (event) => {
       if (!connectingNodeId.current) return;
 
-      const targetIsPane = event.target.classList.contains('react-flow__pane');
+      const targetIsPane = event.target.classList.contains("react-flow__pane");
 
       if (targetIsPane) {
         // we need to remove the wrapper bounds, in order to get the correct position
@@ -83,6 +84,7 @@ const AddNodeOnEdgeDrop = () => {
         fitView
         fitViewOptions={{ padding: 2 }}
         nodeOrigin={[0.5, 0]}
+        nodeTypes={nodeTypes}
       />
     </div>
   );
