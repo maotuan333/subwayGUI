@@ -1,11 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@100..900&family=Lato:ital,wght@0,400;0,700;0,900;1,300;1,400;1,700&family=Open+Sans:wght@300;400;500;600;700&family=Outfit:wght@100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+body {
+  position: relative;
+}
+
 :root {
+  border-radius: 400px;
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
 
   color: #0f0f0f;
-  background-color: #f6f6f6;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -53,8 +73,7 @@ h1 {
   text-align: center;
 }
 
-input,
-button {
+input {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -71,16 +90,7 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
+input {
   outline: none;
 }
 
@@ -91,19 +101,34 @@ button {
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;
-    background-color: #2f2f2f;
   }
 
   a:hover {
     color: #24c8db;
   }
 
-  input,
-  button {
+  input {
     color: #ffffff;
     background-color: #0f0f0f98;
   }
-  button:active {
-    background-color: #0f0f0f69;
-  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1e1e1e;
+  padding: 0;
+  height: 400;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #c4c4c4;
+  border-radius: 20px;
+  border: 5px solid #1e1e1e;
 }
