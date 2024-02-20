@@ -7,8 +7,8 @@ import ReactFlow, {
   ReactFlowProvider,
   Background,
   BackgroundVariant,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+} from "reactflow";
+import "reactflow/dist/style.css";
 
 import "./index.css";
 import SchemaNode from "./SchemaNode";
@@ -23,7 +23,7 @@ const initialNodes = [
     //TODO !Need to raise state up, considering that nodes will be dynamic
     position: { x: 0, y: 50 },
     style: { borderRadius: "50px" },
-  }
+  },
 ];
 
 let id = 1;
@@ -89,8 +89,13 @@ const AddNodeOnEdgeDrop = () => {
         nodeTypes={nodeTypes}
         panOnDrag={false}
       >
-      <Background color="#323234" gap={25} size={3} variant={BackgroundVariant.Dots} />
-        </ReactFlow>
+        <Background
+          color="#323234"
+          gap={25}
+          size={3}
+          variant={BackgroundVariant.Dots}
+        />
+      </ReactFlow>
     </div>
   );
 };
