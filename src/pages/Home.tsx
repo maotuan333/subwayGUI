@@ -13,13 +13,13 @@ function Home() {
                 <div className="p-2 bg-[#0A6DC2] rounded-3xl">
                     <PlusIcon width={20} height={20} />
                 </div>
-                <h1 className="font-sans font-semibold">Schema Builder</h1>
+                <h1 className="font-lato font-semibold">New design file</h1>
             </button>
             <button className={`${styles.ActionButton} bg-[#9747FF]`}>
                 <div className="p-2 bg-[#8638E5] rounded-3xl">
                     <PlusIcon width={20} height={20} />
                 </div>
-                <h1 className="font-sans font-semibold">Run a Subway</h1>
+                <h1 className="font-lato font-semibold">Run a Subway</h1>
             </button>
         </div>
     );

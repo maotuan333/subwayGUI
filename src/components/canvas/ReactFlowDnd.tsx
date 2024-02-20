@@ -5,19 +5,14 @@ import ReactFlow, {
   addEdge,
   useReactFlow,
   ReactFlowProvider,
+  Background,
+  BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 import './index.css';
 
 const initialNodes = [
-  {
-    id: '0',
-    type: 'input',
-    data: { label: 'Node' },
-    position: { x: 0, y: 50 },
-    style: { borderRadius: '50px'}
-  },
 ];
 
 let id = 1;
@@ -71,7 +66,7 @@ const AddNodeOnEdgeDrop = () => {
   );
 
   return (
-    <div className="wrapper" ref={reactFlowWrapper}>
+    <div className="wrapper w-full h-full bg-[#1A1A1C]" ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -83,7 +78,10 @@ const AddNodeOnEdgeDrop = () => {
         fitView
         fitViewOptions={{ padding: 2 }}
         nodeOrigin={[0.5, 0]}
-      />
+        panOnDrag={false}
+      >
+      <Background color="#323234" gap={25} size={3} variant={BackgroundVariant.Dots} />
+        </ReactFlow>
     </div>
   );
 };
