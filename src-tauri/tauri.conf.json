@@ -24,6 +24,7 @@
     "windows": [
       {
         "transparent": true,
+        "fileDropEnabled": false,
         "decorations": false,
         "fullscreen": false,
         "resizable": true,
