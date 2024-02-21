@@ -42,9 +42,7 @@ function App() {
   };
 
   return (
-    <div
-      className={`h-full bg-primary-gray overflow-y-hidden ${isMaximized ? "rounded-none" : "rounded-xl border-[1px] border-[#444444]"}`}
-    >
+    <div className={`h-full bg-primary-gray overflow-y-hidden ${isMaximized ? 'rounded-none' : 'rounded-xl border-[1px] border-[#444444]'}`}>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

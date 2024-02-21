@@ -1,0 +1,8 @@
+.dnd-item-collapsible {
+  border-bottom: 1px solid;
+}
+
+.dnd-item-collapsible-header {
+  display: flex;
+  align-items: center;
+}

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, memo } from "react";
 import { Handle, Position, NodeToolbar } from "reactflow";
-import FileSelector from "./FileSelector";
+import FileSelector from "../FileSelector";
 
 function EditableLabel({
   label,
@@ -71,7 +71,7 @@ function SchemaNode({ data }) {
           handleClick={handleClick}
           isEditing={isEditing}
         />
-        // TODO: Only show text cursor when hovering text
+        {/* TODO: Only show text cursor when hovering text */}
       </div>
       <Handle type="target" position={Position.Top} isConnectable={true} />
 
@@ -86,6 +86,7 @@ function SchemaNode({ data }) {
           <button
             style={{ backgroundColor: "white" }}
             onClick={handleFileSelectClick}
+            className="bg-white text-black"
           >
             Select File
           </button>
