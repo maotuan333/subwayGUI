@@ -11,6 +11,8 @@ import FunctionIcon from "../assets/svg/function.svg?react";
 import styles from "./SchemaBuilder.module.css";
 import { ReactFlowProvider } from "reactflow";
 import DraggableNode from "../components/canvas/DraggableItem";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/@shadcn/ui/collapsible";
+import { ChevronDown } from "lucide-react"
 
 function SchemaBuilder() {
   const editorRef = useRef(null);
@@ -46,23 +48,41 @@ function SchemaBuilder() {
       <ReactFlowProvider >
         <PanelGroup direction="horizontal">
           <div className="w-[30%] border-r-[1px] border-seperator">
-            <div className={`${styles['dnd-item-collapsible']} border-seperator p-4`}>
-              <div className={`${styles['dnd-item-collapsible-header']} gap-2`}>
-                <BlocksIcon height={20} width={20} />
-                <h5 className="text-[15px] font-medium">Objects</h5>
+            <Collapsible >
+              <div className={`${styles['dnd-item-collapsible']} border-seperator p-4`}>
+                <CollapsibleTrigger asChild>
+                  <div className={`${styles['dnd-item-collapsible-header']} justify-between`}>
+                    <div className="flex items-center gap-2">
+                      <BlocksIcon height={20} width={20} />
+                      <h5 className="text-[15px] font-medium">Objects</h5>
+                    </div>
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="dnd-item-collapsible-content mt-4 grid grid-cols-2 gap-2">
+                    <DraggableNode background="#8A3FFC" nodeType='textUpdater' label={'Input'} Icon={<ObjectIcon height={24} width={24} />} />
+                    <DraggableNode background="#12B368" nodeType='input' label={'Validation'} Icon={<ValidationIcon height={24} width={24} />} />
+                    <DraggableNode background="#4B8BF3" nodeType='input' label={'Function'} Icon={<FunctionIcon height={24} width={24} />} />
+                  </div>
+                </CollapsibleContent>
               </div>
-              <div className="dnd-item-collapsible-content mt-4 grid grid-cols-2 gap-2">
-                <DraggableNode background="#8A3FFC" nodeType='textUpdater' label={'Input'} Icon={<ObjectIcon height={24} width={24} />} />
-                <DraggableNode background="#12B368" nodeType='input' label={'Validation'} Icon={<ValidationIcon height={24} width={24} />} />
-                <DraggableNode background="#4B8BF3" nodeType='input' label={'Function'} Icon={<FunctionIcon height={24} width={24} />} />
+            </Collapsible>
+            <Collapsible >
+              <div className={`${styles['dnd-item-collapsible']} border-seperator p-4`}>
+                <CollapsibleTrigger asChild>
+                  <div className={`${styles['dnd-item-collapsible-header']} justify-between`}>
+                    <div className="flex items-center gap-1">
+                      <EditPropertiesIcon height={24} width={24} />
+                      <h5 className="text-[15px] font-medium">Object Properties</h5>
+                    </div>
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                </CollapsibleContent>
               </div>
-            </div>
-            <div className={`${styles['dnd-item-collapsible']} border-seperator p-4`}>
-              <div className={`${styles['dnd-item-collapsible-header']} gap-1`}>
-                <EditPropertiesIcon height={24} width={24} />
-                <h5 className="text-[15px] font-medium">Object Properties</h5>
-              </div>
-            </div>
+            </Collapsible>
           </div>
           <div className="w-full">
             <DnDFlow />
