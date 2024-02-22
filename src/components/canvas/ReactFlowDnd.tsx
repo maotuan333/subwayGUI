@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import ReactFlow, {
   useNodesState,
   useEdgesState,
@@ -7,87 +7,89 @@ import ReactFlow, {
   ReactFlowProvider,
   Background,
   BackgroundVariant,
+  Controls,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
 import "./index.css";
-import SchemaNode from "./SchemaNode";
-
-const nodeTypes = { schemaNode: SchemaNode };
+import SchemaNode from "./Nodes/SchemaNode";
+import TextUpdaterNode from "./Nodes/TextUpdaterNode";
 
 const initialNodes = [
   {
     id: "0",
     type: "schemaNode", //'input' for old version
-    data: { label: "SchemaNode" },
-    //TODO !Need to raise state up, considering that nodes will be dynamic
-    position: { x: 0, y: 50 },
-    style: { borderRadius: "50px" },
+    data: { label: "schema" },
+    position: { x: 0, y: 100 },
   },
 ];
+
+const nodeTypes = { textUpdater: TextUpdaterNode, schemaNode: SchemaNode };
+
 
 let id = 1;
 const getId = () => `${id++}`;
 
 const AddNodeOnEdgeDrop = () => {
   const reactFlowWrapper = useRef(null);
-  const connectingNodeId = useRef(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const { screenToFlowPosition } = useReactFlow();
-  const onConnect = useCallback((params) => {
-    // reset the start node on connections
-    connectingNodeId.current = null;
-    setEdges((eds) => addEdge(params, eds));
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+
+  const onConnect = useCallback(
+    (params) => { params['label'] = 'inputfile.txt'; console.log(params); setEdges((eds) => addEdge(params, eds)) },
+    [],
+  );
+
+  const onDragOver = useCallback((event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const onConnectStart = useCallback((_, { nodeId }) => {
-    connectingNodeId.current = nodeId;
-  }, []);
-
-  const onConnectEnd = useCallback(
+  const onDrop = useCallback(
     (event) => {
-      if (!connectingNodeId.current) return;
+      event.preventDefault();
 
-      const targetIsPane = event.target.classList.contains("react-flow__pane");
+      const type = event.dataTransfer.getData('application/reactflow');
 
-      if (targetIsPane) {
-        // we need to remove the wrapper bounds, in order to get the correct position
-        const id = getId();
-        const newNode = {
-          id,
-          position: screenToFlowPosition({
-            x: event.clientX,
-            y: event.clientY,
-          }),
-          data: { label: `Node ${id}` },
-          origin: [0.5, 0.0],
-        };
-
-        setNodes((nds) => nds.concat(newNode));
-        setEdges((eds) =>
-          eds.concat({ id, source: connectingNodeId.current, target: id }),
-        );
+      // check if the dropped element is valid
+      if (typeof type === 'undefined' || !type) {
+        return;
       }
+
+      // reactFlowInstance.project was renamed to reactFlowInstance.screenToFlowPosition
+      // and you don't need to subtract the reactFlowBounds.left/top anymore
+      // details: https://reactflow.dev/whats-new/2023-11-10
+      const position = reactFlowInstance.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+      const newNode = {
+        id: getId(),
+        type,
+        position,
+        data: { label: `${type} node` },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
     },
-    [screenToFlowPosition],
+    [reactFlowInstance],
   );
 
   return (
     <div className="wrapper w-full h-full bg-[#1A1A1C]" ref={reactFlowWrapper}>
       <ReactFlow
+        maxZoom={1.25}
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onConnectStart={onConnectStart}
-        onConnectEnd={onConnectEnd}
+        onInit={setReactFlowInstance}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
         fitView
-        fitViewOptions={{ padding: 2 }}
-        nodeOrigin={[0.5, 0]}
-        nodeTypes={nodeTypes}
-        panOnDrag={false}
       >
         <Background
           color="#323234"
@@ -95,13 +97,12 @@ const AddNodeOnEdgeDrop = () => {
           size={3}
           variant={BackgroundVariant.Dots}
         />
+        <Controls color="white" className="bg-white" />
       </ReactFlow>
     </div>
   );
 };
 
 export default () => (
-  <ReactFlowProvider>
-    <AddNodeOnEdgeDrop />
-  </ReactFlowProvider>
+  <AddNodeOnEdgeDrop />
 );

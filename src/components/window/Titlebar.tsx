@@ -46,7 +46,7 @@ function Titlebar() {
           data-tauri-drag-region
           className="bg-primary-gray flex items-center justify-center w-12 border-r-[1px] border-seperator h-full"
         >
-          <Logo data-tauri-drag-region width={32} height={32} />
+          <Logo data-tauri-drag-region width={40} height={40} />
         </div>
         <div className="h-full">
           <Tabs />

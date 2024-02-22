@@ -1,4 +1,4 @@
-import React from "react";
+import Logo from "../../assets/svg/subway.svg?react";
 
 export default () => {
   const onDragStart = (event, nodeType) => {
