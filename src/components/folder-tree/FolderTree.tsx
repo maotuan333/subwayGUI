@@ -1,5 +1,7 @@
 import React, {useState, useEffect} from 'react';
+import { open } from '@tauri-apps/api/dialog';
 import { readDir, BaseDirectory } from '@tauri-apps/api/fs';
+import { desktopDir } from '@tauri-apps/api/path';
 import { Tree } from 'react-arborist';
 // Reads the `$APPDATA/users` directory recursively
 
@@ -7,7 +9,15 @@ import { Tree } from 'react-arborist';
 export default () => {
   // const [appDataDirPath, setAppDataDirPath] = useState("");
   const [data, setData] = useState([]);
+  const [root, setRoot] = useState<string|string[]|null>("");
 
+  const openFileFinder = async () => {
+    const selected = await open({
+      directory:true,
+      recursive: true
+    });
+    setRoot(selected);
+  };
 
 
   useEffect(() => {
@@ -34,25 +44,27 @@ export default () => {
     }
     
     const getAppDataDir = async () => {
-      const entries = await readDir('subwayGUI_data', { dir: BaseDirectory.Desktop, recursive: true });
+      console.log(root);
+      if(!root) return;
+      console.log("getting entries")
+      const entries = await readDir(root, { recursive: true });
       loopThroughJSON(entries);
-      console.log(entries);
       setData(entries);
     }
-    
-    getAppDataDir()
+    getAppDataDir();
+  },[root])
 
-  },[])
-
-  useEffect(()=>{console.log(data)}, [data])
 
   return (
+    <>
+    <button onClick={openFileFinder}>Open File</button>
     <Tree
       data={data}
       idAccessor="path"
     >
       {Node}
     </Tree>
+    </>
   );
 };
 

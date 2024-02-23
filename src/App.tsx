@@ -3,7 +3,6 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import Editor from '@monaco-editor/react';
 import { useRef } from "react";
 import DnDFlow from "./components/canvas/ReactFlowDnd";
-import FolderTree from "./components/folder-tree/FolderTree";
 
 import { Routes, Route, Outlet } from "react-router-dom";
 import SchemaBuilder from "./pages/SchemaBuilder";
@@ -38,11 +37,9 @@ function App() {
     return (
       <div className="flex flex-col h-full">
         <Titlebar />
-        <div className="flex w-[100%] h-full overflow-y-hidden">
+        <div className="flex w-full h-full overflow-y-hidden">
           <Sidebar />
-          <div className="flex flex-col h-full grow">
-            <Outlet />
-          </div>
+          <Outlet />         
         </div>
       </div>
     );
