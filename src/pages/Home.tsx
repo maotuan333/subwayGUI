@@ -7,7 +7,7 @@ function Home() {
   const { addTab } = useTabStore();
 
   return (
-    <div className={`${styles.Container} h-full w-full gap-6`}>
+    <div className={`${styles.Container} h-full gap-6 `}>
       <button
         className={`${styles.ActionButton} bg-[#0C8CE9]`}
         onClick={() => addTab("/schema/create")}

@@ -12,6 +12,7 @@ import Titlebar from "./components/window/Titlebar";
 import { useCallback, useEffect, useState } from "react";
 import { appWindow } from "@tauri-apps/api/window";
 import Sidebar from "./components/window/Sidebar";
+import Tabs from "./components/window/Tabs";
 
 function App() {
   const [isMaximized, setIsMaximized] = useState(false);
@@ -37,16 +38,20 @@ function App() {
     return (
       <div className="flex flex-col h-full">
         <Titlebar />
-        <div className="flex w-full h-full overflow-y-hidden">
+        <div className="flex w-full h-full min-w-0 custom-scrollbar">
           <Sidebar />
-          <Outlet />         
+          <div className="flex flex-col h-full grow min-w-0">
+            <Tabs />
+
+            <Outlet />
+          </div>
         </div>
-      </div>
+      </div >
     );
   };
 
   return (
-    <div className={`h-full bg-primary-gray overflow-y-hidden ${isMaximized ? 'rounded-none' : 'rounded-xl border-[1px] border-[#444444]'}`}>
+    <div className={`h-full bg-primary-gray ${isMaximized ? 'rounded-none' : 'rounded-xl border-[1px] border-[#444444]'}`}>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />

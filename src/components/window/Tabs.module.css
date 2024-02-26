@@ -1,4 +1,17 @@
 .TabTrack {
   width: 100%;
   background-color: #252526;
+  overflow-x: hidden;
+  /* padding-left: 15px;
+  padding-right: 5px; */
+  /* padding-left: 15px;
+  padding-right: 5px;
+
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+  */
+}
+
+.TabTrack:hover {
+  overflow: overlay;
 }

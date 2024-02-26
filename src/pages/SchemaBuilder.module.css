@@ -6,3 +6,7 @@
   display: flex;
   align-items: center;
 }
+
+.dnd-item-collapisble-content {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}

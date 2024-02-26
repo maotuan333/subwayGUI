@@ -1,21 +1,41 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { appWindow } from "@tauri-apps/api/window";
-import styles from "./Titlebar.module.css";
-import WindowMinimize from "../icons/WindowMinimize";
-import WindowRestore from "../icons/WindowRestore";
-import WindowClose from "../icons/WindowClose";
-import { useCallback, useEffect, useState } from "react";
-import Logo from "../../assets/svg/subway.svg?react";
-import Tabs from "./Tabs";
-import FolderTree from "../../components/folder-tree/FolderTree";
 import SettingsGear from "../../assets/svg/setting-gear.svg?react";
+import SettingsFolder from "../../assets/svg/sidebar-folder.svg?react";
+import { Link, MemoryRouter, NavLink, Outlet, Route, Routes, UNSAFE_LocationContext } from "react-router-dom";
+import SidebarItem from "./SidebarItems";
+import FolderTree from "../folder-tree/FolderTree";
 
 function Sidebar() {
+
+  const Layout = () => {
+    return (
+      <div className="flex h-full">
+        <div className="w-12 flex justify-between flex-col items-center h-full border-r-[1px] border-seperator">
+          <div id="top-sidebar-icons" className="w-full h-12">
+            <SidebarItem title="File View" route="folder" icon={<SettingsFolder width={30} height={30} />} />
+          </div>
+          <div id="bottom-sidebar-icons" className="w-full h-12">
+            <SidebarItem title="Settings" route="settings" icon={<SettingsGear width={30} height={30} />} />
+          </div>
+        </div>
+        <div className="bg-[#252526]">
+          <Outlet />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="w-fit flex flex-col h-full bg-primary-gray border-r-[1px] border-seperator py-3">
-      <FolderTree />
-      <SettingsGear width={32} height={32} />
-    </div>
+    <UNSAFE_LocationContext.Provider value={null}>
+      <MemoryRouter >
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route path="folder" element={<FolderTree />} />
+            <Route path="settings" element={<div >asdasdhkajskdhjasdjhsaj</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </UNSAFE_LocationContext.Provider >
   );
 }
 
