@@ -4,13 +4,15 @@ import SettingsFolder from "../../assets/svg/sidebar-folder.svg?react";
 import { Link, MemoryRouter, NavLink, Outlet, Route, Routes, UNSAFE_LocationContext } from "react-router-dom";
 import SidebarItem from "./SidebarItems";
 import FolderTree from "../folder-tree/FolderTree";
+import { Panel, PanelResizeHandle } from "react-resizable-panels";
 
 function Sidebar() {
 
   const Layout = () => {
     return (
+
       <div className="flex h-full">
-        <div className="w-12 flex justify-between flex-col items-center h-full border-r-[1px] border-seperator">
+        <div className="w-12 flex justify-between flex-col items-center h-full border-seperator">
           <div id="top-sidebar-icons" className="w-full h-12">
             <SidebarItem title="File View" route="folder" icon={<SettingsFolder width={30} height={30} />} />
           </div>
@@ -18,9 +20,10 @@ function Sidebar() {
             <SidebarItem title="Settings" route="settings" icon={<SettingsGear width={30} height={30} />} />
           </div>
         </div>
-        <div className="bg-[#252526]">
+        <div className="bg-[#252526] border-r-[1px] border-seperator">
           <Outlet />
         </div>
+
       </div>
     )
   }

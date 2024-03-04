@@ -124,7 +124,7 @@ input {
 .custom-scrollbar::-webkit-scrollbar-track {
   background: #1e1e1e;
   padding: 0;
-  height: 400;
+  height: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {

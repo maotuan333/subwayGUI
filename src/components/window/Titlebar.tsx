@@ -39,7 +39,7 @@ function Titlebar() {
   return (
     <div
       data-tauri-drag-region
-      className={`w-full min-h-10 overflow-x-auto flex justify-between items-center border-b-[1px] border-seperator ${isFocused ? "bg-secondary-gray" : "bg-ternary-gray"}`}
+      className={`w-full min-h-11 overflow-hidden flex justify-between items-center border-b-[1px] border-seperator ${isFocused ? "bg-secondary-gray" : "bg-ternary-gray"}`}
     >
       <div className="h-full flex items-center justify-center">
         {/* <div
@@ -47,10 +47,10 @@ function Titlebar() {
           className="bg-primary-gray flex items-center justify-center w-12 border-r-[1px] border-seperator h-full"
         >
           <Logo data-tauri-drag-region width={40} height={40} />
-        </div>
-        <div className="h-full">
-          <Tabs />
         </div> */}
+        <div className="h-full max-w-[40rem] lg:max-w-[60rem] xl:max-w-[80rem] ">
+          <Tabs />
+        </div>
       </div>
       <div className={`${styles.WindowButtonGroup} flex items-center h-full`}>
         <button

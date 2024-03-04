@@ -40,14 +40,14 @@ function SchemaBuilder() {
     <>
       <div
         id="schema-navbar"
-        className="bg-primary-gray w-full py-2 min-h-12 border-b-[1px] border-seperator flex items-center px-4 justify-between"
+        className=" justify-center items-center bg-primary-gray w-full py-2 min-h-12 border-b-[1px] border-seperator flex px-4"
       >
-        <h6 className="text-lg font-medium">Schema Builder</h6>
+        <h6 className="text-md font-base">New Schema Builder</h6>
       </div>
 
       <ReactFlowProvider >
         <PanelGroup direction="horizontal">
-          <div className="w-[40%] border-r-[1px] border-seperator bg-primary-gray">
+          <div className="min-w-[15rem] lg:min-w-[15rem] xl:min-w-[20rem] border-r-[1px] border-seperator bg-primary-gray">
             <Collapsible defaultOpen={true}>
               <div className={`${styles['dnd-item-collapsible']} border-seperator`}>
                 <CollapsibleTrigger asChild>
@@ -61,17 +61,15 @@ function SchemaBuilder() {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className={`${styles['dnd-item-collapisble-content']} grid gap-x-2 gap-y-2 px-4 pb-4`}>
-                    <DraggableNode background="#8A3FFC" nodeType='textUpdater' label={'Input'} Icon={<ObjectIcon height={24} width={24} />} />
+                    <DraggableNode background="#8A3FFC" nodeType='schemaNode' label={'Input'} Icon={<ObjectIcon height={24} width={24} />} />
                     <DraggableNode background="#12B368" nodeType='input' label={'Validation'} Icon={<ValidationIcon height={24} width={24} />} />
-                    <DraggableNode background="#4B8BF3" nodeType='input' label={'Function'} Icon={<FunctionIcon height={24} width={24} />} />
+                    <DraggableNode background="#4B8BF3" nodeType='functionNode' label={'Function'} Icon={<FunctionIcon height={24} width={24} />} />
                   </div>
                 </CollapsibleContent>
               </div>
             </Collapsible>
           </div>
-          <div className="w-full">
-            <DnDFlow />
-          </div>
+          <DnDFlow />
         </PanelGroup >
       </ReactFlowProvider >
     </>

@@ -38,14 +38,19 @@ function App() {
     return (
       <div className="flex flex-col h-full">
         <Titlebar />
-        <div className="flex w-full h-full min-w-0 custom-scrollbar">
-          <Sidebar />
-          <div className="flex flex-col h-full grow min-w-0">
-            <Tabs />
-
-            <Outlet />
+        <PanelGroup direction="horizontal">
+          <div className="flex w-full h-full min-w-0 custom-scrollbar">
+            <Sidebar />
+            {/* <PanelResizeHandle /> */}
+            <Panel>
+              <div className="flex flex-col h-full grow min-w-0">
+                {/* <Tabs /> */}
+                <Outlet />
+              </div>
+            </Panel>
           </div>
-        </div>
+        </PanelGroup>
+
       </div >
     );
   };

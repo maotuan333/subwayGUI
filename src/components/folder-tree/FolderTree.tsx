@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { open } from '@tauri-apps/api/dialog';
 import { readDir, BaseDirectory } from '@tauri-apps/api/fs';
 import { desktopDir } from '@tauri-apps/api/path';
@@ -9,11 +9,11 @@ import { Tree } from 'react-arborist';
 export default () => {
   // const [appDataDirPath, setAppDataDirPath] = useState("");
   const [data, setData] = useState([]);
-  const [root, setRoot] = useState<string|string[]|null>("");
+  const [root, setRoot] = useState<string | string[] | null>("");
 
   const openFileFinder = async () => {
     const selected = await open({
-      directory:true,
+      directory: true,
       recursive: true
     });
     setRoot(selected);
@@ -23,15 +23,15 @@ export default () => {
   useEffect(() => {
     var i = 0; // Create globally scoped variable to create id for files/folder
     function loopThroughJSON(obj) {
-      if (typeof obj === 'object'){
+      if (typeof obj === 'object') {
         obj.id = `${i}`;
         i++;
-      } 
+      }
       for (let key in obj) {
         if (typeof obj[key] === 'object') {
           if (Array.isArray(obj[key])) {
             // loop through array
-           
+
             for (let i = 0; i < obj[key].length; i++) {
               loopThroughJSON(obj[key][i]);
             }
@@ -42,28 +42,34 @@ export default () => {
         }
       }
     }
-    
+
     const getAppDataDir = async () => {
       console.log(root);
-      if(!root) return;
+      if (!root) return;
       console.log("getting entries")
       const entries = await readDir(root, { recursive: true });
       loopThroughJSON(entries);
       setData(entries);
     }
     getAppDataDir();
-  },[root])
+  }, [root])
 
 
   return (
     <>
-    <button onClick={openFileFinder}>Open File</button>
-    <Tree
-      data={data}
-      idAccessor="path"
-    >
-      {Node}
-    </Tree>
+      <button onClick={openFileFinder}>Open File</button>
+      <Tree
+        data={data}
+        openByDefault={false}
+        width={"15rem"}
+        indent={24}
+        rowHeight={36}
+        paddingTop={30}
+        paddingBottom={10}
+        padding={25 /* sets both */}
+      >
+        {Node}
+      </Tree>
     </>
   );
 };
@@ -73,8 +79,8 @@ function Node({ node, style, dragHandle }) {
   /* This node instance can do many things. See the API reference. */
   return (
     <div style={style} ref={dragHandle}>
-      <span onClick={()=>{node.isOpen ? node.close() : node.open()}}>
-      {node.isLeaf ? "🖹" : "🗀"}
+      <span onClick={() => { node.isOpen ? node.close() : node.open() }}>
+        {node.isLeaf ? "🖹" : "🗀"}
       </span>
       {node.data.name}
     </div>

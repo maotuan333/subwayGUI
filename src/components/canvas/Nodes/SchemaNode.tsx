@@ -58,6 +58,7 @@ function SchemaNode({ data }) {
   const handleFileChange = (e) => {
     const selectedFile = e.target.value;
     setLabel(selectedFile);
+    data.label = selectedFile
     setShowTooltip(false);
   };
 
