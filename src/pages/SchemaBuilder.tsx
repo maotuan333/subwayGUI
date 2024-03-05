@@ -4,7 +4,6 @@ import { useMonaco } from "@monaco-editor/react";
 import { useEffect, useRef } from "react";
 import DnDFlow from "../components/canvas/ReactFlowDnd";
 import BlocksIcon from "../assets/svg/blocks.svg?react";
-import EditPropertiesIcon from "../assets/svg/wrench.svg?react";
 import ValidationIcon from "../assets/svg/validation.svg?react";
 import ObjectIcon from "../assets/svg/object.svg?react";
 import FunctionIcon from "../assets/svg/function.svg?react";
@@ -13,6 +12,8 @@ import { ReactFlowProvider } from "reactflow";
 import DraggableNode from "../components/canvas/DraggableItem";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/@shadcn/ui/collapsible";
 import { ChevronDown } from "lucide-react"
+import { ReactFlowContext } from "../contexts/ReactFlowContext";
+import { createRFStore } from "../stores/RFStore";
 
 function SchemaBuilder() {
   const editorRef = useRef(null);
@@ -35,6 +36,8 @@ function SchemaBuilder() {
   function handleEditorDidMount(editor, _) {
     editorRef.current = editor;
   }
+  const store = useRef(createRFStore()).current;
+
 
   return (
     <>
@@ -61,15 +64,17 @@ function SchemaBuilder() {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className={`${styles['dnd-item-collapisble-content']} grid gap-x-2 gap-y-2 px-4 pb-4`}>
-                    <DraggableNode background="#8A3FFC" nodeType='schemaNode' label={'Input'} Icon={<ObjectIcon height={24} width={24} />} />
+                    <DraggableNode background="#4B8BF3" nodeType='schemaNode' label={'Input'} Icon={<ObjectIcon height={24} width={24} />} />
                     <DraggableNode background="#12B368" nodeType='input' label={'Validation'} Icon={<ValidationIcon height={24} width={24} />} />
-                    <DraggableNode background="#4B8BF3" nodeType='functionNode' label={'Function'} Icon={<FunctionIcon height={24} width={24} />} />
+                    <DraggableNode background="#8A3FFC" nodeType='functionNode' label={'Function'} Icon={<FunctionIcon height={24} width={24} />} />
                   </div>
                 </CollapsibleContent>
               </div>
             </Collapsible>
           </div>
-          <DnDFlow />
+          <ReactFlowContext.Provider value={store}>
+            <DnDFlow />
+          </ReactFlowContext.Provider>
         </PanelGroup >
       </ReactFlowProvider >
     </>

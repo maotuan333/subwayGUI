@@ -1,22 +1,21 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { useCallback } from 'react';
-import { Handle, Position } from 'reactflow';
+import { useCallback, useEffect, useState } from 'react';
+import { Handle, NodeProps, Position } from 'reactflow';
 import FunctionIcon from "../../../assets/svg/function.svg?react";
 
-const handleStyle = { left: 10 };
 
-function FunctionNode({ data, isConnectable }) {
-  const onChange = useCallback((evt) => {
-    console.log(evt.target.value);
-  }, []);
+export type CounterData = {
+  initialCount: number;
+};
 
+function FunctionNode(props: NodeProps<CounterData>) {
   return (
     <div>
 
-      <div className="text-updater-node rounded-full bg-[#4B8BF3] p-4 flex justify-center">
-        <Handle type="target" position={Position.Left} isConnectable={isConnectable} />
-        <Handle type="target" position={Position.Right} isConnectable={isConnectable} />
-        <FunctionIcon width={24} height={24} />
+      <div className={`function-node rounded-full bg-[#8A3FFC] p-4 flex justify-center ${props.selected ? 'rf-node-selected' : ''}`}>
+        <Handle type="target" position={Position.Left} isConnectable={props.isConnectable} />
+        <Handle type="target" position={Position.Right} isConnectable={props.isConnectable} />
+        <FunctionIcon width={32} height={32} />
         <div className='absolute top-[110%] w-[10rem]'>
           <h1 className="text-xs font-inter font-semibold">Run Script</h1>
         </div>

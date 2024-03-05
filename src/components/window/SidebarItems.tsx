@@ -12,8 +12,6 @@ const SidebarItem = ({ route, icon }: SidebarItemProps) => {
   const [isActive, setActive] = useState(false);
 
   useEffect(() => {
-    console.log(location.pathname)
-    console.log(matchPath(route, location.pathname))
     if (matchPath(route, location.pathname)) {
       setActive(true);
     }

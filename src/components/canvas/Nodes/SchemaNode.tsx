@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect, memo } from "react";
-import { Handle, Position, NodeToolbar } from "reactflow";
-import FileSelector from "../FileSelector";
+import { useState, useRef, useEffect, memo, useContext } from "react";
+import { Handle, Position, NodeToolbar, NodeProps } from "reactflow";
+import { ReactFlowContext } from "../../../contexts/ReactFlowContext";
+import { useStore } from "zustand";
+import { NodeData } from "../../../stores/RFStore";
 
 function EditableLabel({
   label,
@@ -35,10 +37,9 @@ function EditableLabel({
   );
 }
 
-function SchemaNode({ data }) {
+function SchemaNode({ id, data, selected }: NodeProps<NodeData>) {
   const [isEditing, setIsEditing] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-  const [label, setLabel] = useState(data.label); //TODO raise this state to ReactFlowDnd
   const fileInputRef = useRef(null);
 
   const handleClick = (e) => {
@@ -57,16 +58,18 @@ function SchemaNode({ data }) {
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.value;
-    setLabel(selectedFile);
-    data.label = selectedFile
+    updateNodeLabel(id, selectedFile);
     setShowTooltip(false);
   };
+  const store = useContext(ReactFlowContext)
+  if (!store) throw new Error('Missing ReactFlowContext.Provider in the tree');
+  const { updateNodeLabel } = useStore(store, (s) => s)
 
   return (
-    <div className="schema-node">
+    <div className={`schema-node ${selected ? 'rf-node-selected' : ''}`}>
       <div>
         <EditableLabel
-          label={label}
+          label={data.label}
           handleChange={handleFileChange}
           handleBlur={handleBlur}
           handleClick={handleClick}

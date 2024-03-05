@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.rf-node-selected {
+  border: 1px solid white;
+}
