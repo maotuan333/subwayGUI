@@ -12,8 +12,8 @@ import { ReactFlowProvider } from "reactflow";
 import DraggableNode from "../components/canvas/DraggableItem";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/@shadcn/ui/collapsible";
 import { ChevronDown } from "lucide-react"
-import { ReactFlowContext } from "../contexts/ReactFlowContext";
 import { createRFStore } from "../stores/RFStore";
+import { RFProvider } from "../contexts/ReactFlowContext";
 
 function SchemaBuilder() {
   const editorRef = useRef(null);
@@ -36,7 +36,19 @@ function SchemaBuilder() {
   function handleEditorDidMount(editor, _) {
     editorRef.current = editor;
   }
-  const store = useRef(createRFStore()).current;
+
+  const initialNodes = [
+    {
+      id: "0",
+      type: "schemaNode", //'input' for old version
+      data: { label: "File Pattern" },
+      position: { x: 0, y: 100 },
+    },
+  ];
+
+  const initialEdges = [
+    // { id: '0->1', source: '0', target: '1' },
+  ];
 
 
   return (
@@ -50,7 +62,7 @@ function SchemaBuilder() {
 
       <ReactFlowProvider >
         <PanelGroup direction="horizontal">
-          <div className="min-w-[15rem] lg:min-w-[15rem] xl:min-w-[20rem] border-r-[1px] border-seperator bg-primary-gray">
+          <div className="min-w-[15rem] border-r-[1px] border-seperator bg-primary-gray">
             <Collapsible defaultOpen={true}>
               <div className={`${styles['dnd-item-collapsible']} border-seperator`}>
                 <CollapsibleTrigger asChild>
@@ -64,7 +76,7 @@ function SchemaBuilder() {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className={`${styles['dnd-item-collapisble-content']} grid gap-x-2 gap-y-2 px-4 pb-4`}>
-                    <DraggableNode background="#4B8BF3" nodeType='schemaNode' label={'Input'} Icon={<ObjectIcon height={24} width={24} />} />
+                    <DraggableNode background="#4B8BF3" nodeType='schemaNode' label={'File Pattern'} Icon={<ObjectIcon height={24} width={24} />} />
                     <DraggableNode background="#12B368" nodeType='input' label={'Validation'} Icon={<ValidationIcon height={24} width={24} />} />
                     <DraggableNode background="#8A3FFC" nodeType='functionNode' label={'Function'} Icon={<FunctionIcon height={24} width={24} />} />
                   </div>
@@ -72,9 +84,9 @@ function SchemaBuilder() {
               </div>
             </Collapsible>
           </div>
-          <ReactFlowContext.Provider value={store}>
+          <RFProvider id={0} nodes={initialNodes} edges={initialEdges} >
             <DnDFlow />
-          </ReactFlowContext.Provider>
+          </RFProvider>
         </PanelGroup >
       </ReactFlowProvider >
     </>

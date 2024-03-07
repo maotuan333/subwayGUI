@@ -6,41 +6,38 @@ import ReactFlow, {
   Controls,
   useOnSelectionChange,
   Node,
-  useStoreApi
+  useStoreApi,
+  getIncomers,
+  getOutgoers,
+  getConnectedEdges
 } from "reactflow";
 import "reactflow/dist/style.css";
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../components/@shadcn/ui/tabs"
 
 
 import "./index.css";
 import SchemaNode from "./Nodes/SchemaNode";
 import TextUpdaterNode from "./Nodes/TextUpdaterNode";
 import FunctionNode from "./Nodes/FunctionNode";
-import { ReactFlowContext } from "../../contexts/ReactFlowContext";
+import { useRFContext } from "../../contexts/ReactFlowContext";
 import { useStore } from "zustand";
 import { NodeData } from "~/stores/RFStore";
+import NodeOptionsEdge from "./Edges/NodeOptionsEdge";
 
-
-const initialNodes = [
-  {
-    id: "0",
-    type: "schemaNode", //'input' for old version
-    data: { label: "schema" },
-    position: { x: 0, y: 100 },
-  },
-];
 
 const nodeTypes = { textUpdater: TextUpdaterNode, schemaNode: SchemaNode, functionNode: FunctionNode };
-
-
-let id = 1;
-const getId = () => `${id++}`;
+const edgeTypes = { addNodeOptions: NodeOptionsEdge }
 
 const AddNodeOnEdgeDrop = () => {
-  const store = useContext(ReactFlowContext)
   const rfApiStore = useStoreApi();
-  const { resetSelectedElements, addSelectedNodes } = rfApiStore.getState();
-  if (!store) throw new Error('Missing ReactFlowContext.Provider in the tree');
-  const { nodes, setNodes, onNodesChange, edges, setEdges, onEdgesChange } = useStore(store, (s) => s)
+  const { addSelectedNodes } = rfApiStore.getState();
+  const { getId, nodes, setNodes, onNodesChange, edges, setEdges, onEdgesChange } = useRFContext((s) => s)
   // const edges = useStore(store, (s) => s.edges);
   const reactFlowWrapper = useRef(null);
   // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -48,24 +45,40 @@ const AddNodeOnEdgeDrop = () => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [selectedNodes, setSelectedNodes] = useState([]);
   const [selectedEdges, setSelectedEdges] = useState([]);
+  const onNodesDelete = useCallback(
+    (deleted) => {
+      setEdges(
+        deleted.reduce((acc, node) => {
+          const incomers = getIncomers(node, nodes, edges);
+          const outgoers = getOutgoers(node, nodes, edges);
+          const connectedEdges = getConnectedEdges([node], edges);
 
+          const remainingEdges = acc.filter((edge) => !connectedEdges.includes(edge));
+
+          const createdEdges = incomers.flatMap(({ id: source }) =>
+            outgoers.map(({ id: target }) => ({ id: `${source}->${target}`, source, target }))
+          );
+
+          return [...remainingEdges, ...createdEdges];
+        }, edges)
+      );
+    },
+    [nodes, edges]
+  );
   useOnSelectionChange({
     onChange: ({ nodes, edges }) => {
-      console.log("changed")
       setSelectedNodes(nodes.map((node) => node.id));
       setSelectedEdges(edges.map((edge) => edge.id));
     },
   });
 
-  useEffect(() => {
-    console.log(selectedNodes[0])
-    const selectedNode = nodes.find((node) => node.id == selectedNodes[0]);
-    console.log(selectedNode)
-  }, [selectedNodes])
-
   const onConnect = useCallback(
-    (params) => { params['label'] = 'inputfile.txt'; console.log(params); setEdges((eds) => addEdge(params, eds)) },
-    [],
+    (connection) => {
+      console.log(connection)
+      const edge = { ...connection, type: 'addNodeOptions' };
+      setEdges((eds) => addEdge(edge, eds));
+    },
+    [setEdges],
   );
 
   const onDragOver = useCallback((event) => {
@@ -93,7 +106,7 @@ const AddNodeOnEdgeDrop = () => {
         type,
         position,
         data: {
-          label: `${type} node`
+          label: `File Pattern`
         },
       };
       setNodes((nodes) => nodes.concat(newNode));
@@ -106,14 +119,16 @@ const AddNodeOnEdgeDrop = () => {
 
   return (
     <>
-      <div className="wrapper w-[80%] h-full bg-[#1A1A1C]" ref={reactFlowWrapper}>
+      <div className="wrapper w-full h-full bg-[#1A1A1C]" ref={reactFlowWrapper}>
         <ReactFlow
           maxZoom={1.25}
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onNodesDelete={onNodesDelete}
           onConnect={onConnect}
           onInit={setReactFlowInstance}
           proOptions={{ hideAttribution: true }}
@@ -132,11 +147,23 @@ const AddNodeOnEdgeDrop = () => {
       </div>
       {
         selectedNodes.length > 0 ?
-          <div className="bg-red-200 h-full w-[25%]">
-            <div>
-              <p>{nodes.find((node) => node.id == selectedNodes[0]).data?.label}</p>
+          <div className="bg-primary-gray h-full w-[40rem]">
+            {/* <div>
+              <p>{nodes.find((node) => node.id == selectedNodes[0])?.data?.label}</p>
               <p>Selected edges: {selectedEdges.join(', ')}</p>
-            </div>
+            </div> */}
+            <Tabs defaultValue="properties" className="w-[400px]">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="properties">Properties</TabsTrigger>
+                {/* <TabsTrigger value="password"></TabsTrigger> */}
+              </TabsList>
+              <TabsContent value="properties">
+                <input value={"test input"} />
+              </TabsContent>
+              {/* <TabsContent value="password">
+                hi2
+              </TabsContent> */}
+            </Tabs>
           </div>
           : ''
       }

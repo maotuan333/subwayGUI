@@ -21,12 +21,14 @@ export type NodeData = {
   label: string;
 };
 
-interface RFProps {
+export interface RFProps {
+  id: number,
   nodes: Node<NodeData>[];
   edges: Edge[];
 }
 
-interface RFState extends RFProps {
+export interface RFState extends RFProps {
+  getId: () => string;
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
@@ -39,12 +41,17 @@ export type RFStore = ReturnType<typeof createRFStore>
 
 export const createRFStore = (initProps?: Partial<RFProps>) => {
   const DEFAULT_PROPS: RFProps = {
+    id: 0,
     nodes: [],
     edges: []
   }
   return createStore<RFState>((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    getId: () => {
+      set((state) => ({ id: state.id + 1 })); // Increment the ID using set
+      return `${get().id}`;
+    },
     onNodesChange: (changes: NodeChange[]) => {
       set({
         nodes: applyNodeChanges(changes, get().nodes),
@@ -66,7 +73,9 @@ export const createRFStore = (initProps?: Partial<RFProps>) => {
       }));
     },
     setEdges: (edges) => {
-      set({ edges });
+      set((state) => ({
+        edges: typeof edges === 'function' ? edges(state.edges) : edges,
+      }));
     },
     updateNodeLabel: (nodeId: string, label: string) => {
       set({

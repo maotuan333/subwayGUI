@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, memo, useContext } from "react";
 import { Handle, Position, NodeToolbar, NodeProps } from "reactflow";
-import { ReactFlowContext } from "../../../contexts/ReactFlowContext";
+import { useRFContext } from "../../../contexts/ReactFlowContext";
 import { useStore } from "zustand";
 import { NodeData } from "../../../stores/RFStore";
 
@@ -38,6 +38,7 @@ function EditableLabel({
 }
 
 function SchemaNode({ id, data, selected }: NodeProps<NodeData>) {
+
   const [isEditing, setIsEditing] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const fileInputRef = useRef(null);
@@ -61,12 +62,10 @@ function SchemaNode({ id, data, selected }: NodeProps<NodeData>) {
     updateNodeLabel(id, selectedFile);
     setShowTooltip(false);
   };
-  const store = useContext(ReactFlowContext)
-  if (!store) throw new Error('Missing ReactFlowContext.Provider in the tree');
-  const { updateNodeLabel } = useStore(store, (s) => s)
+  const { updateNodeLabel } = useRFContext((s) => s)
 
   return (
-    <div className={`schema-node ${selected ? 'rf-node-selected' : ''}`}>
+    <div className={`bg-blue-400 schema-node ${selected ? 'rf-node-selected' : ''}`}>
       <div>
         <EditableLabel
           label={data.label}
@@ -77,7 +76,7 @@ function SchemaNode({ id, data, selected }: NodeProps<NodeData>) {
         />
         {/* TODO: Only show text cursor when hovering text */}
       </div>
-      <Handle type="target" position={Position.Top} isConnectable={true} />
+      <Handle type="target" position={Position.Left} isConnectable={true} />
 
       {showTooltip && (
         <NodeToolbar align="end" isVisible position={Position.Bottom}>
@@ -96,7 +95,7 @@ function SchemaNode({ id, data, selected }: NodeProps<NodeData>) {
           </button>
         </NodeToolbar>
       )}
-      <Handle type="source" position={Position.Bottom} isConnectable={true} />
+      <Handle type="source" position={Position.Right} isConnectable={true} />
     </div>
   );
 }
