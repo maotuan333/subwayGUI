@@ -26,7 +26,6 @@ import SchemaNode from "./Nodes/SchemaNode";
 import TextUpdaterNode from "./Nodes/TextUpdaterNode";
 import FunctionNode from "./Nodes/FunctionNode";
 import { useRFContext } from "../../contexts/ReactFlowContext";
-import { useStore } from "zustand";
 import { NodeData } from "~/stores/RFStore";
 import NodeOptionsEdge from "./Edges/NodeOptionsEdge";
 
@@ -147,23 +146,12 @@ const AddNodeOnEdgeDrop = () => {
       </div>
       {
         selectedNodes.length > 0 ?
-          <div className="bg-primary-gray h-full w-[40rem]">
+          <div className="bg-red-200 dark:bg-primary-gray h-full w-[40rem]">
             {/* <div>
               <p>{nodes.find((node) => node.id == selectedNodes[0])?.data?.label}</p>
               <p>Selected edges: {selectedEdges.join(', ')}</p>
             </div> */}
-            <Tabs defaultValue="properties" className="w-[400px]">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="properties">Properties</TabsTrigger>
-                {/* <TabsTrigger value="password"></TabsTrigger> */}
-              </TabsList>
-              <TabsContent value="properties">
-                <input value={"test input"} />
-              </TabsContent>
-              {/* <TabsContent value="password">
-                hi2
-              </TabsContent> */}
-            </Tabs>
+            <h1 className="">Properties</h1>
           </div>
           : ''
       }

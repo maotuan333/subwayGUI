@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ["class"],
+  darkMode: ["media"],
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -40,9 +40,7 @@ module.exports = {
           from: { height: "var(--radix-collapsible-content-height)" },
           to: { height: "0" },
         },
-        "rotate-up": {
-          
-        }
+        "rotate-up": {},
       },
       animation: {
         "collapsible-down": "collapsible-down 0.2s ease-out",

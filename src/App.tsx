@@ -36,7 +36,7 @@ function App() {
 
   const Layout = () => {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full dark:text-white text-white">
         <Titlebar />
         <PanelGroup direction="horizontal">
           <div className="flex w-full h-full min-w-0 custom-scrollbar">

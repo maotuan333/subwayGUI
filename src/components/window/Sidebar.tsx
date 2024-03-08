@@ -1,10 +1,11 @@
 /// <reference types="vite-plugin-svgr/client" />
-import SettingsGear from "../../assets/svg/setting-gear.svg?react";
+// import SettingsGear from "../../assets/svg/setting-gear.svg?react";
 import SettingsFolder from "../../assets/svg/sidebar-folder.svg?react";
 import { Link, MemoryRouter, NavLink, Outlet, Route, Routes, UNSAFE_LocationContext } from "react-router-dom";
 import SidebarItem from "./SidebarItems";
 import FolderTree from "../folder-tree/FolderTree";
 import { Panel, PanelResizeHandle } from "react-resizable-panels";
+import { MoonStar } from "lucide-react";
 
 function Sidebar() {
 
@@ -17,7 +18,9 @@ function Sidebar() {
             <SidebarItem title="File View" route="folder" icon={<SettingsFolder width={30} height={30} />} />
           </div>
           <div id="bottom-sidebar-icons" className="w-full h-12">
-            <SidebarItem title="Settings" route="settings" icon={<SettingsGear width={30} height={30} />} />
+            <div className="h-12 flex items-center justify-center">
+              <MoonStar color="#a9a9a9" />
+            </div>
           </div>
         </div>
         <div className="bg-[#252526] border-r-[1px] border-seperator">
