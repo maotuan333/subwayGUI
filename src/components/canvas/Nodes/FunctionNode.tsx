@@ -1,14 +1,9 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { useCallback, useEffect, useState } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 import FunctionIcon from "../../../assets/svg/function.svg?react";
+import { FunctionNodeData } from '~/types/RFNodes';
 
-
-export type CounterData = {
-  initialCount: number;
-};
-
-function FunctionNode(props: NodeProps<CounterData>) {
+function FunctionNode(props: NodeProps<FunctionNodeData>) {
   return (
     <div>
 

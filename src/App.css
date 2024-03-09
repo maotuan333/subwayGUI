@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 .rf-node-selected {
-  border: 1px solid white;
+  border: 0.5px solid white;
 }

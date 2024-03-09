@@ -15,7 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "../../@shadcn/ui/dropdown-menu"
-import { NodeData } from '../../../stores/RFStore';
+import { CustomNodeData } from '~/types/RFNodes';
 
 export default function NodeOptionsEdge({ id, source, sourceX, sourceY, target, targetX, targetY }) {
   const { getId, nodes, setEdges, onConnect, setNodes } = useRFContext((s) => s)
@@ -28,7 +28,7 @@ export default function NodeOptionsEdge({ id, source, sourceX, sourceY, target, 
   });
 
   const addNodeBetween = (type: string) => {
-    const newNode: Node<NodeData> = {
+    const newNode: Node<CustomNodeData> = {
       id: getId(),
       type,
       position: {
@@ -36,12 +36,12 @@ export default function NodeOptionsEdge({ id, source, sourceX, sourceY, target, 
         y: labelY - 30,
       },
       data: {
-        label: `File Pattern`
+        label: `${type} node`
       },
     };
 
     setNodes((nds) =>
-      nds.map((node: Node<NodeData>) => {
+      nds.map((node: Node<CustomNodeData>) => {
         if (node.id === source) {
           // it's important that you create a new object here
           // in order to notify react flow about the change

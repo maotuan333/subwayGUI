@@ -12,18 +12,11 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from 'reactflow';
-
-// import initialNodes from './nodes';
-// import initialEdges from './edges';
-
-export type NodeData = {
-  color?: string;
-  label: string;
-};
+import { CustomNodeData } from '~/types/RFNodes';
 
 export interface RFProps {
   id: number,
-  nodes: Node<NodeData>[];
+  nodes: Node<CustomNodeData>[];
   edges: Edge[];
 }
 
@@ -34,7 +27,7 @@ export interface RFState extends RFProps {
   onConnect: OnConnect;
   setNodes: (nodes) => void;
   setEdges: (edges) => void;
-  updateNodeLabel: (nodeId: string, label: string) => void;
+  updateNodeData: (nodeId: string, field: string, value: string) => void;
 };
 
 export type RFStore = ReturnType<typeof createRFStore>
@@ -77,14 +70,13 @@ export const createRFStore = (initProps?: Partial<RFProps>) => {
         edges: typeof edges === 'function' ? edges(state.edges) : edges,
       }));
     },
-    updateNodeLabel: (nodeId: string, label: string) => {
+    updateNodeData: (nodeId: string, field: string, value: string) => {
       set({
         nodes: get().nodes.map((node) => {
           if (node.id === nodeId) {
-            // it's important to create a new object here, to inform React Flow about the cahnges
-            node.data = { ...node.data, label };
+            node.data[field] = value;
+            node.data = { ...node.data }
           }
-
           return node;
         }),
       });

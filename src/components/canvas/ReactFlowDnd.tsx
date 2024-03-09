@@ -28,6 +28,8 @@ import FunctionNode from "./Nodes/FunctionNode";
 import { useRFContext } from "../../contexts/ReactFlowContext";
 import { NodeData } from "~/stores/RFStore";
 import NodeOptionsEdge from "./Edges/NodeOptionsEdge";
+import { X } from "lucide-react";
+import NodePropertyForm from "../forms/NodePropertyForm";
 
 
 const nodeTypes = { textUpdater: TextUpdaterNode, schemaNode: SchemaNode, functionNode: FunctionNode };
@@ -68,6 +70,8 @@ const AddNodeOnEdgeDrop = () => {
     onChange: ({ nodes, edges }) => {
       setSelectedNodes(nodes.map((node) => node.id));
       setSelectedEdges(edges.map((edge) => edge.id));
+      // setTimeout(reactFlowInstance.fitView, 200)
+
     },
   });
 
@@ -88,9 +92,7 @@ const AddNodeOnEdgeDrop = () => {
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
-
       const type = event.dataTransfer.getData('application/reactflow');
-
       // check if the dropped element is valid
       if (typeof type === 'undefined' || !type) {
         return;
@@ -105,7 +107,7 @@ const AddNodeOnEdgeDrop = () => {
         type,
         position,
         data: {
-          label: `File Pattern`
+          label: `${type}`,
         },
       };
       setNodes((nodes) => nodes.concat(newNode));
@@ -146,12 +148,21 @@ const AddNodeOnEdgeDrop = () => {
       </div>
       {
         selectedNodes.length > 0 ?
-          <div className="bg-red-200 dark:bg-primary-gray h-full w-[40rem]">
+          <div className="bg-primary-gray h-full w-[40rem]">
             {/* <div>
               <p>{nodes.find((node) => node.id == selectedNodes[0])?.data?.label}</p>
               <p>Selected edges: {selectedEdges.join(', ')}</p>
             </div> */}
-            <h1 className="">Properties</h1>
+            <div className="px-4 flex h-14 items-center justify-between border-seperator border-b-[1px]">
+              <h1 className="font-medium">{`Properties`}</h1>
+              <X className="hover:cursor-pointer" size={18} onClick={() => {
+                addSelectedNodes([])
+              }} />
+            </div>
+            <div className="p-4">
+              <NodePropertyForm id={nodes.find((node) => node.id == selectedNodes[0]).id} data={nodes.find((node) => node.id == selectedNodes[0])?.data} type={nodes.find((node) => node.id == selectedNodes[0])?.type} />
+            </div>
+
           </div>
           : ''
       }
