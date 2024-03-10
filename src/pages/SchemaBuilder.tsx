@@ -8,7 +8,7 @@ import ValidationIcon from "../assets/svg/validation.svg?react";
 import ObjectIcon from "../assets/svg/object.svg?react";
 import FunctionIcon from "../assets/svg/function.svg?react";
 import styles from "./SchemaBuilder.module.css";
-import { ReactFlowProvider } from "reactflow";
+import { MarkerType, ReactFlowProvider } from "reactflow";
 import DraggableNode from "../components/canvas/DraggableItem";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/@shadcn/ui/collapsible";
 import { ChevronDown } from "lucide-react"
@@ -47,7 +47,11 @@ function SchemaBuilder() {
   ];
 
   const initialEdges = [
-    // { id: '0->1', source: '0', target: '1' },
+    {
+      id: '0->1', source: '0', target: '1', type: 'floating', animated: true, markerEnd: {
+        type: MarkerType.ArrowClosed,
+      },
+    },
   ];
 
 

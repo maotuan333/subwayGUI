@@ -26,10 +26,10 @@ import SchemaNode from "./Nodes/SchemaNode";
 import TextUpdaterNode from "./Nodes/TextUpdaterNode";
 import FunctionNode from "./Nodes/FunctionNode";
 import { useRFContext } from "../../contexts/ReactFlowContext";
-import { NodeData } from "~/stores/RFStore";
 import NodeOptionsEdge from "./Edges/NodeOptionsEdge";
-import { X } from "lucide-react";
+import { ChevronLeft, Code, Trash2, TrashIcon, X } from "lucide-react";
 import NodePropertyForm from "../forms/NodePropertyForm";
+import { CustomNodeData } from "~/types/RFNodes";
 
 
 const nodeTypes = { textUpdater: TextUpdaterNode, schemaNode: SchemaNode, functionNode: FunctionNode };
@@ -102,7 +102,7 @@ const AddNodeOnEdgeDrop = () => {
         x: event.clientX,
         y: event.clientY,
       });
-      const newNode: Node<NodeData> = {
+      const newNode: Node<CustomNodeData> = {
         id: getId(),
         type,
         position,
@@ -154,13 +154,25 @@ const AddNodeOnEdgeDrop = () => {
               <p>Selected edges: {selectedEdges.join(', ')}</p>
             </div> */}
             <div className="px-4 flex h-14 items-center justify-between border-seperator border-b-[1px]">
-              <h1 className="font-medium">{`Properties`}</h1>
-              <X className="hover:cursor-pointer" size={18} onClick={() => {
-                addSelectedNodes([])
-              }} />
+              <div className="flex items-center gap-3">
+                <div className="border-[0.5px] rounded-md p-1 hover:bg-white/[0.6]" onClick={() => {
+                  addSelectedNodes([])
+                }}>
+                  <ChevronLeft className="hover:cursor-pointer" size={18} />
+                </div>
+                <h1 className="font-medium">Node Properties</h1>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className=" p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]">
+                  <Code size={14} className="hover:cursor-pointer" />
+                </div>
+                <div className="p-2 rounded-md hover:cursor-pointer hover:bg-red-300/[0.4]">
+                  <Trash2 size={14} className="text-red-300" />
+                </div>
+              </div>
             </div>
             <div className="p-4">
-              <NodePropertyForm id={nodes.find((node) => node.id == selectedNodes[0]).id} data={nodes.find((node) => node.id == selectedNodes[0])?.data} type={nodes.find((node) => node.id == selectedNodes[0])?.type} />
+              <NodePropertyForm id={nodes.find((node) => node.id == selectedNodes[0])?.id} data={nodes.find((node) => node.id == selectedNodes[0])?.data} type={nodes.find((node) => node.id == selectedNodes[0])?.type} />
             </div>
 
           </div>

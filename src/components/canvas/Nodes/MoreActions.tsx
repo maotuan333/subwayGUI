@@ -1,4 +1,4 @@
-import { EllipsisVertical, TrashIcon } from "lucide-react";
+import { EllipsisVertical, Trash2, TrashIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +25,7 @@ function MoreActionsButton() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            <TrashIcon className="text-red-400 mr-2 h-4 w-4" />
+            <Trash2 className="text-red-400 mr-2 h-4 w-4" />
             <span>Delete Node</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>

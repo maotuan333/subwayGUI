@@ -68,14 +68,17 @@ export default function NodeOptionsEdge({ id, source, sourceX, sourceY, target, 
       target: newNode.id,
       sourceHandle: null,
       targetHandle: null,
-      type: 'addNodeOptions'
+      type: 'addNodeOptions',
+      arrowHeadType: 'arrow',
     } as Connection
     const targetConnection = {
       source: newNode.id,
       target: target,
       sourceHandle: null,
       targetHandle: null,
-      type: 'addNodeOptions'
+      type: 'addNodeOptions',
+      arrowHeadType: 'arrow',
+
     } as Connection
     onConnect(sourceConnection);
     onConnect(targetConnection);

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, memo, useContext } from "react";
 import { Handle, Position, NodeToolbar, NodeProps } from "reactflow";
 import { useRFContext } from "../../../contexts/ReactFlowContext";
 import { SchemaNodeData } from "~/types/RFNodes";
-import { EllipsisVertical, FileBox, TrashIcon, TriangleAlert } from "lucide-react";
+import { Blocks, EllipsisVertical, FileBox, TrashIcon, TriangleAlert } from "lucide-react";
 
 import { Separator } from "../../../components/@shadcn/ui/separator";
 import MoreActionsButton from "./MoreActions";
@@ -93,11 +93,21 @@ function SchemaNode({ id, data, selected }: NodeProps<SchemaNodeData>) {
 
       </div>
       {
-        !data.filepath ?
+        !data.extension ?
           <div className="w-full mt-1 absolute ml-auto">
             <div className="flex flex-row-reverse items-center gap-2">
               <h1 className="text-[12px] text-[#bababa]">Missing required properties</h1>
               <TriangleAlert size={16} className="text-red-400" />
+            </div>
+          </div>
+          : ''
+      }
+      {
+        data.extension ?
+          <div className="w-full mt-1 absolute ml-auto break-all">
+            <div className="flex flex-row-reverse items-center gap-1">
+              <h1 className="text-[12px]">Matches {data.extension} files {data.prefix ? `starting with ${data.prefix}` : ''}</h1>
+              {/* <Blocks size={18} /> */}
             </div>
           </div>
           : ''
