@@ -38,7 +38,7 @@ const edgeTypes = { addNodeOptions: NodeOptionsEdge }
 const AddNodeOnEdgeDrop = () => {
   const rfApiStore = useStoreApi();
   const { addSelectedNodes } = rfApiStore.getState();
-  const { getId, nodes, setNodes, onNodesChange, edges, setEdges, onEdgesChange } = useRFContext((s) => s)
+  const { getId, nodes, setNodes, onNodesChange, removeNode, edges, setEdges, onEdgesChange } = useRFContext((s) => s)
   // const edges = useStore(store, (s) => s.edges);
   const reactFlowWrapper = useRef(null);
   // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -166,7 +166,7 @@ const AddNodeOnEdgeDrop = () => {
                 <div className=" p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]">
                   <Code size={14} className="hover:cursor-pointer" />
                 </div>
-                <div className="p-2 rounded-md hover:cursor-pointer hover:bg-red-300/[0.4]">
+                <div className="p-2 rounded-md hover:cursor-pointer hover:bg-red-300/[0.4]" onClick={() => removeNode(nodes.find((node) => node.id == selectedNodes[0])?.id)}>
                   <Trash2 size={14} className="text-red-300" />
                 </div>
               </div>

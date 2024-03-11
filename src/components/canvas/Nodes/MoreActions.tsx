@@ -13,8 +13,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "../../@shadcn/ui/dropdown-menu"
+import { useRFContext } from "../../../contexts/ReactFlowContext";
 
-function MoreActionsButton() {
+function MoreActionsButton({ nodeId }) {
+  const { removeNode } = useRFContext((s) => s)
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -24,7 +27,7 @@ function MoreActionsButton() {
         <DropdownMenuLabel>Node Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => removeNode(nodeId)}>
             <Trash2 className="text-red-400 mr-2 h-4 w-4" />
             <span>Delete Node</span>
           </DropdownMenuItem>

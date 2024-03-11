@@ -80,7 +80,7 @@ function SchemaNode({ id, data, selected }: NodeProps<SchemaNodeData>) {
                 <h1 className="text-xs text-[#bababa]">File Pattern</h1>
               </div>
             </div>
-            <MoreActionsButton />
+            <MoreActionsButton nodeId={id} />
           </div>
 
         </div>
