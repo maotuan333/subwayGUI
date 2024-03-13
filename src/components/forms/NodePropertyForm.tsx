@@ -2,7 +2,7 @@
 import { Input } from '../@shadcn/ui/input';
 import { useForm } from 'react-hook-form';
 import { useRFContext } from '../../contexts/ReactFlowContext';
-import { Node } from 'reactflow';
+import { Node, useStore } from 'reactflow';
 import { CustomNodeData } from '~/types/RFNodes';
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../@shadcn/ui/form';
@@ -24,14 +24,16 @@ const formStructureMapping = {
   },
 };
 
-const NodePropertyForm = ({ id, type, data }) => {
+const NodePropertyForm = () => {
+  const selectedNode = useStore(s => s.getNodes().filter(node => node.selected))[0];
+  // console.log(selectedNode)
   const form = useForm();
-  const formStructure = formStructureMapping[type];
-  const { setNodes } = useRFContext((s) => s)
+  const formStructure = formStructureMapping[selectedNode?.type];
+  const setNodes = useRFContext((s) => s.setNodes);
   const updateField = (value: string, field: string) => {
     setNodes((nds) =>
       nds.map((node: Node<CustomNodeData>) => {
-        if (node.id === id) {
+        if (node.id === selectedNode?.id) {
           node.data[field] = value;
         }
         return node;
@@ -45,55 +47,57 @@ const NodePropertyForm = ({ id, type, data }) => {
   }
 
   return (
-    <Form {...form}>
+    <div className=''>
+      <Form {...form}>
 
-      <FormField
-        control={form.control}
-        name="username"
-        render={({ field }) => (
-          formStructure.fields.map((field) => {
-            return (
-              <div key={field.name}>
-                {
-                  field.type === "select" ?
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a verified email to display" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="m@example.com">m@example.com</SelectItem>
-                              <SelectItem value="m@google.com">m@google.com</SelectItem>
-                              <SelectItem value="m@support.com">m@support.com</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    :
-                    <FormItem className='mb-4'>
-                      <FormLabel>{field.label} {field.required ? '*' : ''}</FormLabel>
-                      <FormControl>
-                        <Input autoComplete='off' onChange={(e) => updateField(e.target?.value, field.name)} value={data[field.name]} placeholder={`${field.name}...`} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                }
-              </div>
-            )
-          })
-        )
-        }
-      />
-    </Form>
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            formStructure.fields.map((field) => {
+              return (
+                <div key={field.name}>
+                  {
+                    field.type === "select" ?
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a verified email to display" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="m@example.com">m@example.com</SelectItem>
+                                <SelectItem value="m@google.com">m@google.com</SelectItem>
+                                <SelectItem value="m@support.com">m@support.com</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      :
+                      <FormItem className='mb-4'>
+                        <FormLabel className='flex gap-1'>{field.label} {field.required ? <h1 className='text-red-400'>*</h1> : ''}</FormLabel>
+                        <FormControl>
+                          <Input autoComplete='off' onChange={(e) => updateField(e.target?.value, field.name)} value={selectedNode?.data[field.name]} placeholder={`${field.name}...`} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                  }
+                </div>
+              )
+            })
+          )
+          }
+        />
+      </Form>
+    </div>
     // <form onSubmit={handleSubmit}>
     // {formStructure.fields.map((field) => (
     //   <div key={field.name}>

@@ -15,7 +15,7 @@ import {
 import { CustomNodeData } from '~/types/RFNodes';
 
 export interface RFProps {
-  id: number,
+  id: string,
   nodes: Node<CustomNodeData>[];
   edges: Edge[];
 }
@@ -35,7 +35,7 @@ export type RFStore = ReturnType<typeof createRFStore>
 
 export const createRFStore = (initProps?: Partial<RFProps>) => {
   const DEFAULT_PROPS: RFProps = {
-    id: 0,
+    id: "0",
     nodes: [],
     edges: []
   }
@@ -43,7 +43,8 @@ export const createRFStore = (initProps?: Partial<RFProps>) => {
     ...DEFAULT_PROPS,
     ...initProps,
     getId: () => {
-      set((state) => ({ id: state.id + 1 })); // Increment the ID using set
+      console.log(parseInt(get().id, 10) + 1)
+      set((state) => ({ id: `${parseInt(state.id, 10) + 1}` })); // Increment the ID using set
       return `${get().id}`;
     },
     onNodesChange: (changes: NodeChange[]) => {
@@ -58,7 +59,7 @@ export const createRFStore = (initProps?: Partial<RFProps>) => {
     },
     onConnect: (connection: Connection) => {
       set({
-        edges: addEdge(connection, get().edges),
+        edges: addEdge({ ...connection, animated: true }, get().edges),
       });
     },
     setNodes: (nodes) => {
@@ -66,14 +67,17 @@ export const createRFStore = (initProps?: Partial<RFProps>) => {
         nodes: typeof nodes === 'function' ? nodes(state.nodes) : nodes,
       }));
     },
+    addNode: (node: Node) => {
+      set((state) => ({
+        nodes: state.nodes.concat(node)
+      }))
+    },
     setEdges: (edges) => {
       set((state) => ({
         edges: typeof edges === 'function' ? edges(state.edges) : edges,
       }));
     },
     removeNode: (nodeId: string) => {
-      console.log(nodeId)
-      console.log(get().nodes.filter((node) => node.id != nodeId))
       set({
         nodes: get().nodes.filter((node) => node.id != nodeId)
       })

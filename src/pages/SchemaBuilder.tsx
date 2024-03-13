@@ -1,7 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 import { PanelGroup } from "react-resizable-panels";
 import { useMonaco } from "@monaco-editor/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import DnDFlow from "../components/canvas/ReactFlowDnd";
 import BlocksIcon from "../assets/svg/blocks.svg?react";
 import ValidationIcon from "../assets/svg/validation.svg?react";
@@ -11,12 +11,13 @@ import styles from "./SchemaBuilder.module.css";
 import { MarkerType, ReactFlowProvider } from "reactflow";
 import DraggableNode from "../components/canvas/DraggableItem";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/@shadcn/ui/collapsible";
-import { ChevronDown } from "lucide-react"
-import { createRFStore } from "../stores/RFStore";
+import { ChevronDown, Code } from "lucide-react"
 import { RFProvider } from "../contexts/ReactFlowContext";
 
 function SchemaBuilder() {
   const editorRef = useRef(null);
+  const flowRef = useRef();
+
   const monaco = useMonaco();
   // const { screenToFlowPosition, setViewport, setCenter } = useReactFlow();
 
@@ -48,12 +49,11 @@ function SchemaBuilder() {
 
   const initialEdges = [
     {
-      id: '0->1', source: '0', target: '1', type: 'floating', animated: true, markerEnd: {
+      id: '0->1', source: '0', target: '1', animated: true, markerEnd: {
         type: MarkerType.ArrowClosed,
       },
     },
   ];
-
 
   return (
     <>
@@ -61,8 +61,17 @@ function SchemaBuilder() {
         id="schema-navbar"
         className=" justify-center items-center bg-primary-gray w-full py-2 min-h-12 border-b-[1px] border-seperator flex px-4"
       >
-        <h6 className="text-md font-base">New Schema Builder</h6>
-      </div>
+        <h6 className="text-lg font-semibold">New Schema Builder</h6>
+        <div className="ml-auto flex items-center gap-3">
+          {/* @ts-ignore */}
+          <button className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]" onClick={() => flowRef.current?.saveSchema("example.yaml")}>
+            <Code size={14} className="hover:cursor-pointer" />
+          </button>
+          <button className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
+            Save Schema
+          </button>
+        </div>
+      </div >
 
       <ReactFlowProvider >
         <PanelGroup direction="horizontal">
@@ -88,8 +97,8 @@ function SchemaBuilder() {
               </div>
             </Collapsible>
           </div>
-          <RFProvider id={0} nodes={initialNodes} edges={initialEdges} >
-            <DnDFlow />
+          <RFProvider id={"0"} nodes={initialNodes} edges={initialEdges} >
+            <DnDFlow ref={flowRef} />
           </RFProvider>
         </PanelGroup >
       </ReactFlowProvider >

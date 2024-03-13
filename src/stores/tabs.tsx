@@ -23,21 +23,29 @@ interface TabState {
 const RouteToTabMap = {
   "/": () => ({
     id: uuidv4(),
-    label: "New page",
+    label: `New page`,
     route: "/",
     active: true,
   }),
-  "/schema/create": () => ({
-    id: uuidv4(),
-    label: "Schema Builder",
-    route: "/schema/create",
-    active: true,
-  }),
+  "/schema/create": () => {
+    const id = uuidv4();
+    return (
+      {
+        id: id,
+        label: `Schema Builder`,
+        route: `/schema/create/${id}`,
+        active: true,
+      }
+    )
+  },
 };
 
-export const TabToIcon = {
-  "/": <NewTabIcon className="min-w-[16px]" />,
-  "/schema/create": <SchemaBuilderIcon className="min-w-[16px]" />,
+export const TabToIcon = (route) => {
+  if (route === "/") {
+    return <NewTabIcon className="min-w-[16px]" />
+  } else if (route.startsWith("/schema/create")) {
+    return <SchemaBuilderIcon className="min-w-[16px]" />
+  }
 };
 
 export const useTabStore = create<TabState>()(
@@ -47,7 +55,6 @@ export const useTabStore = create<TabState>()(
       tabs: [RouteToTabMap["/"]()],
       addTab: (route: string) => {
         set((state) => {
-          console.log();
           return {
             tabs: [
               ...state.tabs

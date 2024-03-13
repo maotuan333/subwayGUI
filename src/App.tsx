@@ -60,7 +60,7 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/schema/create" element={<SchemaBuilder />} />
+          <Route path="/schema/create/:id" element={<SchemaBuilder />} />
           <Route path="*" element={<Missing />} />
         </Route>
       </Routes>

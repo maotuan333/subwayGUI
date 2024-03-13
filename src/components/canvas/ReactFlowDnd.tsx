@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useRef, useState } from "react";
 import ReactFlow, {
   addEdge,
   Background,
@@ -19,6 +19,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../components/@shadcn/ui/tabs"
+import YAML from 'yaml'
 
 
 import "./index.css";
@@ -30,15 +31,29 @@ import NodeOptionsEdge from "./Edges/NodeOptionsEdge";
 import { ChevronLeft, Code, Trash2, TrashIcon, X } from "lucide-react";
 import NodePropertyForm from "../forms/NodePropertyForm";
 import { CustomNodeData } from "~/types/RFNodes";
+import { BaseDirectory, writeTextFile } from "@tauri-apps/api/fs";
 
 
 const nodeTypes = { textUpdater: TextUpdaterNode, schemaNode: SchemaNode, functionNode: FunctionNode };
 const edgeTypes = { addNodeOptions: NodeOptionsEdge }
 
-const AddNodeOnEdgeDrop = () => {
+const AddNodeOnEdgeDrop = forwardRef((props, ref) => {
+
+
   const rfApiStore = useStoreApi();
   const { addSelectedNodes } = rfApiStore.getState();
   const { getId, nodes, setNodes, onNodesChange, removeNode, edges, setEdges, onEdgesChange } = useRFContext((s) => s)
+  // @ts-ignore
+  useImperativeHandle(ref, () => ({
+
+    async saveSchema(filename) {
+      const nodeData = YAML.stringify(nodes.map((node) => ({ id: node.id, label: node.data.label, pattern: node.data?.extension || "", prefix: node.data?.prefix })))
+      const appDataDir = BaseDirectory.Download;
+      console.log(`subwaygui-data\\${filename}`)
+      await writeTextFile(`subwaygui-data\\${filename}`, nodeData, { dir: appDataDir, });
+    }
+
+  }));
   // const edges = useStore(store, (s) => s.edges);
   const reactFlowWrapper = useRef(null);
   // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -163,16 +178,16 @@ const AddNodeOnEdgeDrop = () => {
                 <h1 className="font-medium">Node Properties</h1>
               </div>
               <div className="flex items-center gap-2">
-                <div className=" p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]">
+                {/* <div className=" p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]">
                   <Code size={14} className="hover:cursor-pointer" />
-                </div>
+                </div> */}
                 <div className="p-2 rounded-md hover:cursor-pointer hover:bg-red-300/[0.4]" onClick={() => removeNode(nodes.find((node) => node.id == selectedNodes[0])?.id)}>
                   <Trash2 size={14} className="text-red-300" />
                 </div>
               </div>
             </div>
             <div className="p-4">
-              <NodePropertyForm id={nodes.find((node) => node.id == selectedNodes[0])?.id} data={nodes.find((node) => node.id == selectedNodes[0])?.data} type={nodes.find((node) => node.id == selectedNodes[0])?.type} />
+              <NodePropertyForm />
             </div>
 
           </div>
@@ -180,8 +195,6 @@ const AddNodeOnEdgeDrop = () => {
       }
     </>
   );
-};
+});
 
-export default () => (
-  <AddNodeOnEdgeDrop />
-);
+export default AddNodeOnEdgeDrop;

@@ -18,7 +18,12 @@ import {
 import { CustomNodeData } from '~/types/RFNodes';
 
 export default function NodeOptionsEdge({ id, source, sourceX, sourceY, target, targetX, targetY }) {
-  const { getId, nodes, setEdges, onConnect, setNodes } = useRFContext((s) => s)
+  // const { getId, nodes, setEdges, onConnect, setNodes } = useRFContext((s) => s)
+  const getId = useRFContext((s) => s.getId);
+  const setNodes = useRFContext((s) => s.setNodes);
+  const onConnect = useRFContext((s) => s.onConnect);
+  const setEdges = useRFContext((s) => s.setEdges);
+
 
   const [edgePath, labelX, labelY] = getStraightPath({
     sourceX,
@@ -68,6 +73,7 @@ export default function NodeOptionsEdge({ id, source, sourceX, sourceY, target, 
       target: newNode.id,
       sourceHandle: null,
       targetHandle: null,
+      animated: true,
       type: 'addNodeOptions',
       arrowHeadType: 'arrow',
     } as Connection

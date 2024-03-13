@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "SubwayGUI",
-    "version": "0.0.1"  
+    "version": "0.0.1"
   },
   "tauri": {
     "macOSPrivateApi": true,
@@ -15,9 +15,9 @@
       "all": false,
       "dialog": {
         "all": true,
-        "ask": true, 
-        "confirm": true, 
-        "message": true, 
+        "ask": true,
+        "confirm": true,
+        "message": true,
         "open": true,
         "save": true
       },
@@ -26,7 +26,12 @@
       },
       "fs": {
         "all": true,
-        "scope": ["$DESKTOP/subwayGUI_data", "$DESKTOP/subwayGUI_data/*"]
+        "scope": [
+          "$DESKTOP/subwayGUI_data",
+          "$DESKTOP/subwayGUI_data/*",
+          "$DOWNLOAD/*",
+          "$DOWNLOAD/subwayGUI-data/*"
+        ]
       },
       "shell": {
         "all": false,

@@ -16,7 +16,7 @@ import {
 import { useRFContext } from "../../../contexts/ReactFlowContext";
 
 function MoreActionsButton({ nodeId }) {
-  const { removeNode } = useRFContext((s) => s)
+  const removeNode = useRFContext((s) => s.removeNode);
 
   return (
     <DropdownMenu>

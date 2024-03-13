@@ -11,7 +11,6 @@ function Tabs() {
 
   const { addTab, removeTab, setActive, getActive, tabs } = useTabStore();
   useEffect(() => {
-    console.log(tabs);
     const activeTab = getActive();
     if (activeTab) {
       navigate(activeTab.route);
@@ -38,7 +37,7 @@ function Tabs() {
                 }}
               >
                 <div className="flex items-center gap-1.5">
-                  {TabToIcon[tab.route]}
+                  {TabToIcon(tab.route)}
                   <h6 className="text-[12px] font-semibold truncate max-w-[6rem] ">
                     {tab.label}
                   </h6>

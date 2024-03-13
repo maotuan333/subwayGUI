@@ -45,6 +45,7 @@ function SchemaNode({ id, data, selected }: NodeProps<SchemaNodeData>) {
   const [showTooltip, setShowTooltip] = useState(false);
   const fileInputRef = useRef(null);
   const { updateNodeData } = useRFContext((s) => s)
+  // const updateNodeData = useRFContext((s) => s.updateNodeData);
 
   const handleClick = (e) => {
     setIsEditing(true);
@@ -106,7 +107,7 @@ function SchemaNode({ id, data, selected }: NodeProps<SchemaNodeData>) {
         data.extension ?
           <div className="w-full mt-1 absolute ml-auto break-all">
             <div className="flex flex-row-reverse items-center gap-1">
-              <h1 className="text-[12px]">Matches {data.extension} files {data.prefix ? `starting with ${data.prefix}` : ''}</h1>
+              <h1 className="text-[12px]">Matches <span className="font-bold italic">{data.extension}</span> files {data.prefix ? <span>starting with <span className="font-bold">{data.prefix}</span></span> : ''}</h1>
               {/* <Blocks size={18} /> */}
             </div>
           </div>
