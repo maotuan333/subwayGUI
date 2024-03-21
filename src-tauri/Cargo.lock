@@ -2486,10 +2486,13 @@ checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
 name = "subwaygui"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
+ "glob",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
+ "walkdir",
 ]
 
 [[package]]
