@@ -176,6 +176,12 @@ mod tests {
     }
 }
 
+#[tauri::command]
+async fn read_file(path: std::path::PathBuf) -> Vec<u8> {
+    // std::fs::ReadDir(path);
+	std::fs::read(path).unwrap()
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![fileMatch])

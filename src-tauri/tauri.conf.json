@@ -1,29 +1,61 @@
 {
   "build": {
-    "beforeDevCommand": "yarn dev",
-    "beforeBuildCommand": "yarn build",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist"
   },
   "package": {
-    "productName": ".",
-    "version": "0.0.0"
+    "productName": "SubwayGUI",
+    "version": "0.0.1"
   },
   "tauri": {
+    "macOSPrivateApi": true,
     "allowlist": {
       "all": false,
+      "dialog": {
+        "all": true,
+        "ask": true,
+        "confirm": true,
+        "message": true,
+        "open": true,
+        "save": true
+      },
+      "path": {
+        "all": true
+      },
+      "fs": {
+        "all": true,
+        "scope": [
+          "$DESKTOP/subwayGUI_data",
+          "$DESKTOP/subwayGUI_data/*",
+          "$DOWNLOAD/*",
+          "$DOWNLOAD/subwayGUI-data/*"
+        ]
+      },
       "shell": {
         "all": false,
         "open": true
+      },
+      "window": {
+        "all": true
       }
     },
     "windows": [
       {
+        "transparent": true,
+        "fileDropEnabled": false,
+        "decorations": false,
         "fullscreen": false,
         "resizable": true,
         "title": "subwaygui",
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
         "width": 800,
-        "height": 600
+        "minWidth": 800,
+        "height": 600,
+        "minHeight": 600,
+        "maximized": true
       }
     ],
     "security": {
@@ -32,7 +64,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.subwaygui.dev",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
