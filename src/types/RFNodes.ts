@@ -14,3 +14,6 @@ export interface SchemaNodeData extends DefaultNodeData {
 }
 
 export type CustomNodeData = SchemaNodeData | FunctionNodeData;
+
+
+// node = id, data: {label, filepath, extension, prefix}

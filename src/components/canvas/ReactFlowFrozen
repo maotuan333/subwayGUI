@@ -1,0 +1,30 @@
+import ReactFlow, { useReactFlow } from 'reactflow';
+
+const ReactFlowFrozen = ({ nodes, edges }) => {
+  const reactFlowInstance = useReactFlow();
+
+  // Disable interactions on the ReactFlow instance
+  reactFlowInstance.setNodesDraggable(false);
+  reactFlowInstance.setNodesConnectable(false);
+  reactFlowInstance.setElementsEditable(false);
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      fitView
+      defaultZoom={1.25}
+      layoutOptions={{
+        'elk.hierarchical.enabled': true,
+        'elk.hierarchical.layoutOrientation': 'LAYOUT_TOP_DOWN',
+        'elk.padding': [50, 50, 50, 50], // Add padding around the layout
+      }}
+      onLayoutInitialized={(layout) => {
+        // Call the layout algorithm when the ReactFlow instance is initialized
+        reactFlowInstance.layoutELK();
+      }}
+    />
+  );
+};
+
+export default ReactFlowFrozen;

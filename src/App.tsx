@@ -1,11 +1,12 @@
 import "./App.css";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import Editor from '@monaco-editor/react';
+import Editor from "@monaco-editor/react";
 import { useRef } from "react";
 import DnDFlow from "./components/canvas/ReactFlowDnd";
 
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, BrowserRouter } from "react-router-dom";
 import SchemaBuilder from "./pages/SchemaBuilder";
+import RunSchema from "./pages/RunSchema";
 import Missing from "./components/router/Missing";
 import Home from "./pages/Home";
 import Titlebar from "./components/window/Titlebar";
@@ -50,17 +51,19 @@ function App() {
             </Panel>
           </div>
         </PanelGroup>
-
-      </div >
+      </div>
     );
   };
 
   return (
-    <div className={`h-full bg-primary-gray ${isMaximized ? 'rounded-none' : 'rounded-xl border-[1px] border-[#444444]'}`}>
+    <div
+      className={`h-full bg-primary-gray ${isMaximized ? "rounded-none" : "rounded-xl border-[1px] border-[#444444]"}`}
+    >
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/schema/create/:id" element={<SchemaBuilder />} />
+          <Route path="/schema/run/:id" element={<RunSchema />} />
           <Route path="*" element={<Missing />} />
         </Route>
       </Routes>

@@ -29,22 +29,31 @@ const RouteToTabMap = {
   }),
   "/schema/create": () => {
     const id = uuidv4();
-    return (
-      {
-        id: id,
-        label: `Schema Builder`,
-        route: `/schema/create/${id}`,
-        active: true,
-      }
-    )
+    return {
+      id: id,
+      label: `Schema Builder`,
+      route: `/schema/create/${id}`,
+      active: true,
+    };
+  },
+  "/schema/run": () => {
+    const id = uuidv4();
+    return {
+      id: id,
+      label: `Run Subway`,
+      route: `/schema/run/${id}`,
+      active: true,
+    };
   },
 };
 
 export const TabToIcon = (route) => {
   if (route === "/") {
-    return <NewTabIcon className="min-w-[16px]" />
+    return <NewTabIcon className="min-w-[16px]" />;
   } else if (route.startsWith("/schema/create")) {
-    return <SchemaBuilderIcon className="min-w-[16px]" />
+    return <SchemaBuilderIcon className="min-w-[16px]" />;
+  } else if (route.startsWith("/schema/run")) {
+    return <SchemaBuilderIcon className="min-w-[16px]" />;
   }
 };
 

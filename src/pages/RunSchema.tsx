@@ -1,27 +1,31 @@
 /// <reference types="vite-plugin-svgr/client" />
 import { PanelGroup } from "react-resizable-panels";
 import { useMonaco } from "@monaco-editor/react";
-import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { useEffect, useRef } from "react";
 import DnDFlow from "../components/canvas/ReactFlowDnd";
 import BlocksIcon from "../assets/svg/blocks.svg?react";
 import ValidationIcon from "../assets/svg/validation.svg?react";
 import ObjectIcon from "../assets/svg/object.svg?react";
 import FunctionIcon from "../assets/svg/function.svg?react";
-import styles from "./SchemaBuilder.module.css";
-import { MarkerType, ReactFlowProvider } from "reactflow";
+import styles from "./RunSchema.module.css";
+import { ReactFlowProvider } from "reactflow";
 import DraggableNode from "../components/canvas/DraggableItem";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../components/@shadcn/ui/collapsible";
-import { ChevronDown, Code } from "lucide-react";
-import { RFProvider } from "../contexts/ReactFlowContext";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "../components/@shadcn/ui/resizable";
+import { ChevronDown } from "lucide-react";
+import { ReactFlowContext } from "../contexts/ReactFlowContext";
+import { createRFStore } from "../stores/RFStore";
 
-function SchemaBuilder() {
+function RunSchema() {
   const editorRef = useRef(null);
-  const flowRef = useRef(null);
-
   const monaco = useMonaco();
   // const { screenToFlowPosition, setViewport, setCenter } = useReactFlow();
 
@@ -41,27 +45,7 @@ function SchemaBuilder() {
   function handleEditorDidMount(editor, _) {
     editorRef.current = editor;
   }
-
-  const initialNodes = [
-    {
-      id: "0",
-      type: "schemaNode", //'input' for old version
-      data: { label: "File Pattern" },
-      position: { x: 0, y: 100 },
-    },
-  ];
-
-  const initialEdges = [
-    {
-      id: "0->1",
-      source: "0",
-      target: "1",
-      animated: true,
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-      },
-    },
-  ];
+  const store = useRef(createRFStore()).current;
 
   return (
     <>
@@ -69,37 +53,12 @@ function SchemaBuilder() {
         id="schema-navbar"
         className=" justify-center items-center bg-primary-gray w-full py-2 min-h-12 border-b-[1px] border-seperator flex px-4"
       >
-        <h6 className="text-lg font-semibold">New Schema Builder</h6>
-        <div className="ml-auto flex items-center gap-3">
-          {/* @ts-ignore */}
-          <button
-            className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]"
-            onClick={() => {
-              console.log(flowRef, flowRef.current);
-              flowRef.current?.saveSchema("example.yaml");
-            }}
-          >
-            <Code size={14} className="hover:cursor-pointer" />
-          </button>
-          <button className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
-            Save Schema
-          </button>
-
-          <button
-            className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]"
-            onClick={() => flowRef.current?.loadSchema("example.yaml")}
-          >
-            <Code size={14} className="hover:cursor-pointer" />
-          </button>
-          <button className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
-            Load Schema
-          </button>
-        </div>
+        <h6 className="text-md font-base">New Run</h6>
       </div>
 
       <ReactFlowProvider>
         <PanelGroup direction="horizontal">
-          <div className="min-w-[15rem] border-r-[1px] border-seperator bg-primary-gray">
+          <div className="min-w-[15rem] lg:min-w-[15rem] xl:min-w-[20rem] border-r-[1px] border-seperator bg-primary-gray">
             <Collapsible defaultOpen={true}>
               <div
                 className={`${styles["dnd-item-collapsible"]} border-seperator`}
@@ -122,7 +81,7 @@ function SchemaBuilder() {
                     <DraggableNode
                       background="#4B8BF3"
                       nodeType="schemaNode"
-                      label={"File Pattern"}
+                      label={"Input"}
                       Icon={<ObjectIcon height={24} width={24} />}
                     />
                     <DraggableNode
@@ -142,13 +101,25 @@ function SchemaBuilder() {
               </div>
             </Collapsible>
           </div>
-          <RFProvider id={"0"} nodes={initialNodes} edges={initialEdges}>
-            <DnDFlow ref={flowRef} />
-          </RFProvider>
+          <ReactFlowContext.Provider value={store}>
+            <ResizablePanelGroup
+              direction="vertical"
+              style={{ height: "100vh" }}
+            >
+              <ResizablePanel maxSize={30} minSize={15}>
+                <DnDFlow />
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel maxSize={30} minSize={15}>
+                <DnDFlow />
+              </ResizablePanel>
+              <ResizablePanel style={{ flex: "1 1 auto" }} />
+            </ResizablePanelGroup>
+          </ReactFlowContext.Provider>
         </PanelGroup>
       </ReactFlowProvider>
     </>
   );
 }
 
-export default SchemaBuilder;
+export default RunSchema;

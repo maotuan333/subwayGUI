@@ -17,7 +17,10 @@ function Home() {
         </div>
         <h1 className="font-medium text-sm mt-2">Schema Builder</h1>
       </button>
-      <button className={`${styles.ActionButton} bg-[#9747FF]`}>
+      <button
+        className={`${styles.ActionButton} bg-[#9747FF]`}
+        onClick={() => addTab("/schema/run")}
+      >
         <div className="p-2 bg-[#8638E5] rounded-3xl">
           <PlusIcon width={20} height={20} />
         </div>
