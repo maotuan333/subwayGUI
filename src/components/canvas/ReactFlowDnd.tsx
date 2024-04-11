@@ -49,20 +49,28 @@ dagreGraph.setDefaultEdgeLabel(() => ({}));
 
 const getLayoutedElements = (elements) => {
   dagreGraph.setGraph({ rankdir: "LR" });
+  dagreGraph.graph.rankdir = "LR";
+
   console.log("set dagre graph");
 
   elements.forEach((el) => {
     if (isNode(el)) {
-      dagreGraph.setNode(el.id);
+      dagreGraph.setNode(el.id, { label: el.label, pattern: el.pattern });
+      console.log(`Added node: ${el.id}`);
     } else {
       dagreGraph.setEdge(el.source, el.target);
+      console.log(`Added edge: ${el.source} -> ${el.target}`);
     }
   });
+
   dagre.layout(dagreGraph);
   console.log("layout dagre graph");
+  console.log(dagreGraph);
+
   return elements.map((el) => {
     if (isNode(el)) {
       const nodeWithPosition = dagreGraph.node(el.id);
+      console.log(el.id);
       console.log(nodeWithPosition);
       if (nodeWithPosition) {
         el.targetPosition = "left";

@@ -75,7 +75,7 @@ function SchemaBuilder() {
           <button
             className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]"
             onClick={() => {
-              console.log(flowRef, flowRef.current);
+              // console.log(flowRef, flowRef.current);
               flowRef.current?.saveSchema("example.yaml");
             }}
           >

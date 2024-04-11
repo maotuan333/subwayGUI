@@ -20,13 +20,23 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "../components/@shadcn/ui/resizable";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Code } from "lucide-react";
 import { ReactFlowContext } from "../contexts/ReactFlowContext";
 import { createRFStore } from "../stores/RFStore";
 
 function RunSchema() {
+  const flowRefs = useRef([]);
   const editorRef = useRef(null);
   const monaco = useMonaco();
+  flowRefs.current = [];
+  // TODO How are we gonna pass in backend info
+  const subways = [
+    { id: "1", rootfolder: "/" },
+    { id: "2", rootfolder: "/" },
+  ];
+  // TODO Create stores somewhere else?
+  const stores = subways.map(() => createRFStore());
+
   // const { screenToFlowPosition, setViewport, setCenter } = useReactFlow();
 
   useEffect(() => {
@@ -45,7 +55,13 @@ function RunSchema() {
   function handleEditorDidMount(editor, _) {
     editorRef.current = editor;
   }
-  const store = useRef(createRFStore()).current;
+
+  const addToRefs = (el) => {
+    if (el && !flowRefs.current.includes(el)) {
+      flowRefs.current.push(el);
+    }
+    console.log(flowRefs.current);
+  };
 
   return (
     <>
@@ -54,6 +70,20 @@ function RunSchema() {
         className=" justify-center items-center bg-primary-gray w-full py-2 min-h-12 border-b-[1px] border-seperator flex px-4"
       >
         <h6 className="text-md font-base">New Run</h6>
+        <div className="ml-auto flex items-center gap-3">
+          {/* @ts-ignore */}
+          <button
+            className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]"
+            onClick={() =>
+              flowRefs.current.map((el) => el.loadSchema("example.yaml"))
+            }
+          >
+            <Code size={14} className="hover:cursor-pointer" />
+          </button>
+          <button className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
+            Load Schema
+          </button>
+        </div>
       </div>
 
       <ReactFlowProvider>
@@ -101,21 +131,25 @@ function RunSchema() {
               </div>
             </Collapsible>
           </div>
-          <ReactFlowContext.Provider value={store}>
-            <ResizablePanelGroup
-              direction="vertical"
-              style={{ height: "100vh" }}
-            >
-              <ResizablePanel maxSize={30} minSize={15}>
-                <DnDFlow />
-              </ResizablePanel>
-              <ResizableHandle />
-              <ResizablePanel maxSize={30} minSize={15}>
-                <DnDFlow />
-              </ResizablePanel>
-              <ResizablePanel style={{ flex: "1 1 auto" }} />
-            </ResizablePanelGroup>
-          </ReactFlowContext.Provider>
+          <ResizablePanelGroup direction="vertical" style={{ height: "100vh" }}>
+            {subways.map(({ id, rootfolder }, index) => {
+              const store = stores[index];
+              return (
+                <>
+                  <ResizablePanel maxSize={30} minSize={15}>
+                    <p>
+                      {id},{rootfolder}
+                    </p>
+                    <ReactFlowContext.Provider value={store}>
+                      <DnDFlow ref={addToRefs} />
+                    </ReactFlowContext.Provider>
+                  </ResizablePanel>
+                  <ResizableHandle />
+                </>
+              );
+            })}
+            <ResizablePanel style={{ flex: "1 1 auto" }} />
+          </ResizablePanelGroup>
         </PanelGroup>
       </ReactFlowProvider>
     </>
