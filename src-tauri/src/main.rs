@@ -1,24 +1,22 @@
-
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::thread::panicking;
-use std::{fs, path::Path};
+use anyhow::anyhow;
+use anyhow::Error as Err;
 use glob::glob;
-use serde_json::Map;
 use serde::{ser::Error, Deserialize, Serialize};
 use serde_json::error::Error as SerdeError;
-use walkdir::WalkDir;
-use walkdir::DirEntry;
+use serde_json::Map;
 use std::collections::HashMap;
 use std::string::String;
-use anyhow::Error as Err;
-use anyhow::anyhow;
+use std::thread::panicking;
+use std::{fs, path::Path};
 use tauri::InvokeError;
+use walkdir::DirEntry;
+use walkdir::WalkDir;
 
 fn filter(entry: &DirEntry, pattern: &str) -> bool {
-    
-    let is_match = entry.
-        file_name()
+    let is_match = entry
+        .file_name()
         .to_str()
         .map(|s| s.ends_with(pattern))
         .unwrap_or(false);
@@ -29,20 +27,19 @@ fn filter(entry: &DirEntry, pattern: &str) -> bool {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Input{
+struct Input {
     patterns: Vec<Pattern>,
-    folders: Vec<String>
+    folders: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct Pattern{
+struct Pattern {
     filename: String,
-    status: String
+    status: String,
 }
 
 fn parse_input_data(json_str: &str) -> Result<Input, SerdeError> {
     serde_json::from_str(json_str)
-
 }
 #[derive(Debug)]
 struct SerializableError {
@@ -81,29 +78,26 @@ fn construct_full_filename(path: &Path) -> Option<String> {
     Some(format!("{}.{}", file_stem, extension))
 }
 
-
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn fileMatch(input:&str) -> Result<String, SerializableError>{
+fn fileMatch(directory: &str) -> Result<String, SerializableError> {
     // Specify the folder path and the pattern
     //TODO Mach a list of file patterns
-    
- 
-    let inputData = parse_input_data(input)?;
+
+    let inputData: Input = parse_input_data(directory)?;
     let mut res: HashMap<String, Vec<Pattern>> = HashMap::new();
 
-    for folder in inputData.folders{
+    for folder in inputData.folders {
         // match file for each folder
-        let mut temp:Vec<Pattern> = Vec::new();
-        
-        for pattern in inputData.patterns.clone(){
+        let mut temp: Vec<Pattern> = Vec::new();
 
+        for pattern in inputData.patterns.clone() {
             println!("{:?}", pattern);
-            
+
             // let walker = WalkDir::new(folder.clone())
             //     .into_iter()
             //     .filter_entry(|e| filter(e, &pattern.ext));
-            
+
             let mut found = 0;
             // for entry in walker.filter_map(Result::ok) {
             //     if let Some(filename) = entry.path().to_str() {
@@ -113,20 +107,26 @@ fn fileMatch(input:&str) -> Result<String, SerializableError>{
             //     }
             // }
             for entry in WalkDir::new(folder.clone())
-            .into_iter()
-            .filter_map(Result::ok) // Handle potential errors
-            .filter(|e| e.file_type().is_file()) // Make sure it's a file
+                .into_iter()
+                .filter_map(Result::ok) // Handle potential errors
+                .filter(|e| e.file_type().is_file())
+            // Make sure it's a file
             {
                 let path = entry.path();
                 // println!("{:?}", path.file_name());
 
                 if let Some(full_filename) = construct_full_filename(path) {
-                    if full_filename.ends_with(&pattern.filename){
-                        
-                        println!("Found valid file: {} for pattern: {}", entry.path().display(), &pattern.filename);
-                        temp.push(Pattern { filename: entry.path().display().to_string(), status: "valid".to_string() });
+                    if full_filename.ends_with(&pattern.filename) {
+                        println!(
+                            "Found valid file: {} for pattern: {}",
+                            entry.path().display(),
+                            &pattern.filename
+                        );
+                        temp.push(Pattern {
+                            filename: entry.path().display().to_string(),
+                            status: "valid".to_string(),
+                        });
                         found += 1;
-                        
                     }
                 }
             }
@@ -134,13 +134,14 @@ fn fileMatch(input:&str) -> Result<String, SerializableError>{
             // for entry in WalkDir::new(&folder).into_iter().filter_map(Result::ok) {
             //     println!("Entry: {:?}", entry.path());
             // }
-        
-            if found == 0{
-                println!("File missing for pattern: {}", &pattern.filename);
-                temp.push(Pattern{filename: pattern.filename, status:"missing".to_string()});
-            }
-                
 
+            if found == 0 {
+                println!("File missing for pattern: {}", &pattern.filename);
+                temp.push(Pattern {
+                    filename: pattern.filename,
+                    status: "missing".to_string(),
+                });
+            }
         }
         res.insert(folder.clone(), temp);
     }
@@ -148,7 +149,6 @@ fn fileMatch(input:&str) -> Result<String, SerializableError>{
         println!("Serialization error: {}", e);
         SerializableError::from("Failed to serialize response")
     })
-    
 }
 #[cfg(test)]
 mod tests {
@@ -156,7 +156,10 @@ mod tests {
 
     #[test] // Use this for async tests, requires the `tokio` crate. Otherwise, just use #[test] for synchronous tests.
     fn test_file_match() {
-        println!("Current working directory: {:?}", std::env::current_dir().unwrap());
+        println!(
+            "Current working directory: {:?}",
+            std::env::current_dir().unwrap()
+        );
 
         // Setup
         let input = serde_json::json!({
@@ -179,13 +182,7 @@ mod tests {
 #[tauri::command]
 async fn read_file(path: std::path::PathBuf) -> Vec<u8> {
     // std::fs::ReadDir(path);
-	std::fs::read(path).unwrap()
-}
-
-#[tauri::command]
-async fn read_file(path: std::path::PathBuf) -> Vec<u8> {
-    // std::fs::ReadDir(path);
-	std::fs::read(path).unwrap()
+    std::fs::read(path).unwrap()
 }
 
 fn main() {
