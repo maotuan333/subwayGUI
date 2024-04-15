@@ -11,6 +11,8 @@ import ReactFlow, {
   addEdge,
   Background,
   BackgroundVariant,
+  Background,
+  BackgroundVariant,
   Controls,
   useOnSelectionChange,
   Node,
@@ -177,6 +179,8 @@ const AddNodeOnEdgeDrop = forwardRef((props, ref) => {
   const reactFlowWrapper = useRef(null);
   // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [selectedNodes, setSelectedNodes] = useState([]);
   const [selectedEdges, setSelectedEdges] = useState([]);
@@ -242,13 +246,21 @@ const AddNodeOnEdgeDrop = forwardRef((props, ref) => {
         y: event.clientY,
       });
       const newNode: Node<CustomNodeData> = {
+      const newNode: Node<CustomNodeData> = {
         id: getId(),
         type,
         position,
         data: {
           label: `${type}`,
         },
+        data: {
+          label: `${type}`,
+        },
       };
+      setNodes((nodes) => nodes.concat(newNode));
+      setTimeout(() => {
+        addSelectedNodes([newNode.id]);
+      }, 1);
       setNodes((nodes) => nodes.concat(newNode));
       setTimeout(() => {
         addSelectedNodes([newNode.id]);
