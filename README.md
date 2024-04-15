@@ -1,5 +1,8 @@
 # Tauri + React + Typescript
 
+
+![image](https://github.com/selina-lii/subwayGUI/assets/80687346/0d6914fb-e7fa-46f9-b608-b8ded73dc5cb)
+
 This template should help get you started developing with Tauri, React and Typescript in Vite.
 
 ## Recommended IDE Setup

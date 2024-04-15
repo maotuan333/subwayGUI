@@ -1,0 +1,50 @@
+.menu-bar {
+    background: #333;
+    color: white;
+    display: flex;
+    padding: 0.5rem 0;
+}
+
+.menu-list {
+    list-style-type: none;
+    display: flex;
+    padding-left: 0;
+}
+
+.menu-item {
+    position: relative; /* Needed for absolute positioning of dropdown */
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background-color: #555; /* Change as per your theme */
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%; /* Align dropdown right below the menu item */
+    left: 0;
+    background: #444;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 0.5rem;
+    text-align: left;
+    font-size: 0.8em; /* Smaller font size; adjust as needed */
+    white-space: nowrap; /* Prevents text from wrapping */
+    overflow: hidden; /* Ensures overflow text is hidden */
+    text-overflow: ellipsis; /* Adds an ellipsis to text that overflows */
+}
+
+.dropdown button:hover {
+    background-color: #555;
+}
