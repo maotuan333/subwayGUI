@@ -11,8 +11,6 @@ import ReactFlow, {
   addEdge,
   Background,
   BackgroundVariant,
-  Background,
-  BackgroundVariant,
   Controls,
   useOnSelectionChange,
   Node,
@@ -46,12 +44,13 @@ import { CustomNodeData } from "../../types/RFNodes"; //okay ~ didn't work?
 import { BaseDirectory, writeTextFile, readTextFile } from "@tauri-apps/api/fs";
 import dagre from "dagre";
 import React from "react";
-const dagreGraph = new dagre.graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
+
 
 const getLayoutedElements = (elements) => {
+
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({ rankdir: "LR" });
-  dagreGraph.graph.rankdir = "LR";
 
   console.log("set dagre graph");
 
@@ -97,8 +96,17 @@ const nodeTypes = {
 };
 const edgeTypes = { addNodeOptions: NodeOptionsEdge };
 
-const AddNodeOnEdgeDrop = forwardRef((props, ref) => {
+
+
+interface AddNodeOnEdgeDropProps {
+  initialSchema?: string; // Adjust the type as needed
+  // Other props...
+}
+
+
+const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
   const rfApiStore = useStoreApi();
+  const {initialSchema} = props;
   const { addSelectedNodes } = rfApiStore.getState();
   const {
     getId,
@@ -111,68 +119,75 @@ const AddNodeOnEdgeDrop = forwardRef((props, ref) => {
     onEdgesChange,
   } = useRFContext((s) => s);
   // @ts-ignore
-  useImperativeHandle(ref, () => ({
-    async saveSchema(filename) {
-      const schemaData = YAML.stringify({
-        nodes: nodes.map((node) => ({
-          id: node.id,
-          label: node.data.label,
-          pattern: node.data?.extension || "",
-          prefix: node.data?.prefix,
-        })),
-        edges: edges.map((edge) => ({
-          id: edge.id,
-          source: edge.source,
-          target: edge.target,
-        })),
-      });
-      console.log(schemaData);
-      console.log(`subwayGUI-data/${filename}`);
-      await writeTextFile(`subwayGUI-data/${filename}`, schemaData, {
-        dir: BaseDirectory.Download,
-      });
-      console.log("saved");
-    },
-    async loadSchema(filename) {
-      console.log("called");
-      const schemaYAML = await readTextFile(`subwayGUI-data/${filename}`, {
-        dir: BaseDirectory.Download,
-      });
-      console.log("read");
-      const schemaData = YAML.parse(schemaYAML);
-      console.log(schemaData);
-      const parsedNodes: Node<CustomNodeData>[] = schemaData.nodes.map(
-        (node) => ({
-          id: node.id,
-          type: node.label,
-          data: {
-            label: node.label,
-            pattern: node.pattern, //suffix
-            prefix: node.prefix, // prefix
-          },
-          position: { x: 0, y: 0 }, // do we need this
-          sourcePosition: "right",
-          targetPosition: "left",
-        }),
-      );
-      console.log(parsedNodes);
-      const parsedEdges: Edge[] = schemaData.edges.map((edge) => ({
+
+
+  const loadSchema = async (filename) => {
+    console.log("called");
+    const schemaYAML = await readTextFile(`subwayGUI-data/${filename}`, {
+      dir: BaseDirectory.Download,
+    });
+    console.log("read");
+    const schemaData = YAML.parse(schemaYAML);
+    console.log(schemaData);
+    const parsedNodes: Node<CustomNodeData>[] = schemaData.nodes.map(
+      (node) => ({
+        id: node.id,
+        type: node.label,
+        data: {
+          label: node.label,
+          pattern: node.pattern, //suffix
+          prefix: node.prefix, // prefix
+        },
+        position: { x: 0, y: 0 }, // do we need this
+        sourcePosition: "right",
+        targetPosition: "left",
+      }),
+    );
+    console.log(parsedNodes);
+    const parsedEdges: Edge[] = schemaData.edges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      animated: true,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+      },
+    }));
+    console.log(parsedEdges);
+    const layoutedNodes = getLayoutedElements(parsedNodes);
+    console.log(layoutedNodes);
+    setNodes([...layoutedNodes]);
+    setEdges([...parsedEdges]);
+    reactFlowInstance.fitView();
+    console.log(`read in subwaygui-data\\${filename}`);
+  };
+
+  const saveSchema = async (filename) =>{
+    const schemaData = YAML.stringify({
+      nodes: nodes.map((node) => ({
+        id: node.id,
+        label: node.data.label,
+        pattern: node.data?.extension || "",
+        prefix: node.data?.prefix,
+      })),
+      edges: edges.map((edge) => ({
         id: edge.id,
         source: edge.source,
         target: edge.target,
-        animated: true,
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-        },
-      }));
-      console.log(parsedEdges);
-      const layoutedNodes = getLayoutedElements(parsedNodes);
-      console.log(layoutedNodes);
-      setNodes([...layoutedNodes]);
-      setEdges([...parsedEdges]);
-      reactFlowInstance.fitView();
-      console.log(`read in subwaygui-data\\${filename}`);
-    },
+      })),
+    });
+    console.log(schemaData);
+    console.log(`subwayGUI-data/${filename}`);
+    await writeTextFile(`subwayGUI-data/${filename}`, schemaData, {
+      dir: BaseDirectory.Download,
+    });
+    console.log("saved");
+  }
+
+
+  useImperativeHandle(ref, () => ({
+    saveSchema,
+    loadSchema
   }));
 
   // const edges = useStore(store, (s) => s.edges);
@@ -246,13 +261,9 @@ const AddNodeOnEdgeDrop = forwardRef((props, ref) => {
         y: event.clientY,
       });
       const newNode: Node<CustomNodeData> = {
-      const newNode: Node<CustomNodeData> = {
         id: getId(),
         type,
         position,
-        data: {
-          label: `${type}`,
-        },
         data: {
           label: `${type}`,
         },
@@ -261,14 +272,17 @@ const AddNodeOnEdgeDrop = forwardRef((props, ref) => {
       setTimeout(() => {
         addSelectedNodes([newNode.id]);
       }, 1);
-      setNodes((nodes) => nodes.concat(newNode));
-      setTimeout(() => {
-        addSelectedNodes([newNode.id]);
-      }, 1);
     },
     [reactFlowInstance],
   );
 
+  useEffect(() => {
+    if (initialSchema) {
+      // Logic to load and apply the schema
+      loadSchema(initialSchema);
+    }
+  }, [initialSchema]);
+  
   return (
     <>
       <div

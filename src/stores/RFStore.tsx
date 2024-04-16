@@ -33,9 +33,9 @@ export interface RFState extends RFProps {
 
 export type RFStore = ReturnType<typeof createRFStore>
 
-export const createRFStore = (initProps?: Partial<RFProps>) => {
+export const createRFStore = (id:string, initProps?: Partial<RFProps>) => {
   const DEFAULT_PROPS: RFProps = {
-    id: "0",
+    id,
     nodes: [],
     edges: []
   }

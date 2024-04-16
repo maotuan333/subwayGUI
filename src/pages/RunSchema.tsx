@@ -1,7 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 import { PanelGroup } from "react-resizable-panels";
 import { useMonaco } from "@monaco-editor/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import DnDFlow from "../components/canvas/ReactFlowDnd";
 import BlocksIcon from "../assets/svg/blocks.svg?react";
 import ValidationIcon from "../assets/svg/validation.svg?react";
@@ -23,6 +23,13 @@ import {
 import { ChevronDown, Code } from "lucide-react";
 import { ReactFlowContext } from "../contexts/ReactFlowContext";
 import { createRFStore } from "../stores/RFStore";
+import { invoke } from '@tauri-apps/api/tauri';
+import path from 'path';
+
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 function RunSchema() {
   const flowRefs = useRef([]);
@@ -30,12 +37,7 @@ function RunSchema() {
   const monaco = useMonaco();
   flowRefs.current = [];
   // TODO How are we gonna pass in backend info
-  const subways = [
-    { id: "1", rootfolder: "/" },
-    { id: "2", rootfolder: "/" },
-  ];
-  // TODO Create stores somewhere else?
-  const stores = subways.map(() => createRFStore());
+  const [subways, setSubways] = useState([]);
 
   // const { screenToFlowPosition, setViewport, setCenter } = useReactFlow();
 
@@ -56,6 +58,17 @@ function RunSchema() {
     editorRef.current = editor;
   }
 
+  const handleLoadClick = () => {
+    // Call the Rust function and update the state with the returned data
+    invoke('filematch',{directory: path.resolve(__dirname)}).then((response) => {
+      const data = JSON.parse(response); // Assuming the response is a JSON string
+      console.log(data)
+      setSubways(data); // Update the state with the returned data
+    }).catch((error) => {
+      console.error('Error calling filematch:', error);
+    });
+  };
+
   const addToRefs = (el) => {
     if (el && !flowRefs.current.includes(el)) {
       flowRefs.current.push(el);
@@ -75,7 +88,9 @@ function RunSchema() {
           <button
             className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]"
             onClick={() =>
+              {handleLoadClick()
               flowRefs.current.map((el) => el.loadSchema("example.yaml"))
+              }
             }
           >
             <Code size={14} className="hover:cursor-pointer" />
@@ -132,16 +147,16 @@ function RunSchema() {
             </Collapsible>
           </div>
           <ResizablePanelGroup direction="vertical" style={{ height: "100vh" }}>
-            {subways.map(({ id, rootfolder }, index) => {
-              const store = stores[index];
+            {subways.map((item, index) => {
+              const store = createRFStore(`${index}`)
               return (
                 <>
                   <ResizablePanel maxSize={30} minSize={15}>
                     <p>
-                      {id},{rootfolder}
+                      {item}
                     </p>
-                    <ReactFlowContext.Provider value={store}>
-                      <DnDFlow ref={addToRefs} />
+                    <ReactFlowContext.Provider value={store} key={index}>
+                      <DnDFlow ref={addToRefs} initialSchema="example.yaml"/>
                     </ReactFlowContext.Provider>
                   </ResizablePanel>
                   <ResizableHandle />
