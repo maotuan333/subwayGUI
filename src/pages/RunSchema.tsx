@@ -24,11 +24,10 @@ import { ChevronDown, Code } from "lucide-react";
 import { ReactFlowContext } from "../contexts/ReactFlowContext";
 import { createRFStore } from "../stores/RFStore";
 import { invoke } from '@tauri-apps/api/tauri';
-import path from 'path';
-
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { BaseDirectory, downloadDir } from '@tauri-apps/api/path';
+import { readTextFile } from "@tauri-apps/api/fs";
+import YAML from "yaml";
+import path from "path";
 
 
 function RunSchema() {
@@ -58,16 +57,41 @@ function RunSchema() {
     editorRef.current = editor;
   }
 
-  const handleLoadClick = () => {
+  const handleLoadClick = async (filename) => {
+
+
     // Call the Rust function and update the state with the returned data
-    invoke('filematch',{directory: path.resolve(__dirname)}).then((response) => {
+    const loadSchemaForFileMatch = async (fn) => {
+      const schemaYAML = await readTextFile(`subwayGUI-data/${fn}`, {
+        dir: BaseDirectory.Download,
+      });
+      console.log("read");
+      const schemaData = YAML.parse(schemaYAML);
+      console.log(schemaData);
+      const patterns = schemaData.nodes.map(node => {
+        return {
+          filename: node.pattern,
+          status: "unknown"
+        };
+      });
+      const inputs = JSON.stringify({
+        patterns: patterns,
+        folders: ["pages"]
+      });
+      return inputs;
+    };
+
+    const inputs = await loadSchemaForFileMatch(filename);
+
+    invoke('fileMatch',{inputs: inputs}).then((response) => {
+      console.log(response);
       const data = JSON.parse(response); // Assuming the response is a JSON string
-      console.log(data)
+      console.log(data);
       setSubways(data); // Update the state with the returned data
     }).catch((error) => {
       console.error('Error calling filematch:', error);
     });
-  };
+};
 
   const addToRefs = (el) => {
     if (el && !flowRefs.current.includes(el)) {
@@ -88,7 +112,7 @@ function RunSchema() {
           <button
             className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]"
             onClick={() =>
-              {handleLoadClick()
+              {handleLoadClick("example.yaml")
               flowRefs.current.map((el) => el.loadSchema("example.yaml"))
               }
             }

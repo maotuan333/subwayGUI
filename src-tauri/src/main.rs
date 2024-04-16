@@ -7,9 +7,10 @@ use serde::{ser::Error, Deserialize, Serialize};
 use serde_json::error::Error as SerdeError;
 use serde_json::Map;
 use std::collections::HashMap;
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::string::String;
 use std::thread::panicking;
-use std::{fs, path::Path};
 use tauri::InvokeError;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
@@ -80,16 +81,26 @@ fn construct_full_filename(path: &Path) -> Option<String> {
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn fileMatch(directory: &str) -> Result<String, SerializableError> {
+fn fileMatch(inputs: String) -> Result<String, SerializableError> {
     // Specify the folder path and the pattern
     //TODO Mach a list of file patterns
 
-    let inputData: Input = parse_input_data(directory)?;
+    println!("hi1");
+
+    let downloadDir = tauri::api::path::download_dir().unwrap();
+    println!("hi2");
+
+    let inputData: Input = parse_input_data(&inputs)?;
+    println!("hi3");
+
     let mut res: HashMap<String, Vec<Pattern>> = HashMap::new();
 
-    for folder in inputData.folders {
+    println!("hi4");
+
+    for fol in inputData.folders {
         // match file for each folder
         let mut temp: Vec<Pattern> = Vec::new();
+        let mut folder = downloadDir.join(&fol).to_str().unwrap().to_string();
 
         for pattern in inputData.patterns.clone() {
             println!("{:?}", pattern);
