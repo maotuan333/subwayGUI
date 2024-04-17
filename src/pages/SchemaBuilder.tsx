@@ -52,15 +52,15 @@ function SchemaBuilder() {
   ];
 
   const initialEdges = [
-    {
-      id: "0->1",
-      source: "0",
-      target: "1",
-      animated: true,
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-      },
-    },
+    // {
+    //   id: "0->1",
+    //   source: "0",
+    //   target: "1",
+    //   animated: true,
+    //   markerEnd: {
+    //     type: MarkerType.ArrowClosed,
+    //   },
+    // },
   ];
 
   return (
@@ -72,7 +72,7 @@ function SchemaBuilder() {
         <h6 className="text-lg font-semibold">New Schema Builder</h6>
         <div className="ml-auto flex items-center gap-3">
           {/* @ts-ignore */}
-          <button
+          {/* <button
             className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]"
             onClick={() => {
               // console.log(flowRef, flowRef.current);
@@ -80,19 +80,9 @@ function SchemaBuilder() {
             }}
           >
             <Code size={14} className="hover:cursor-pointer" />
-          </button>
-          <button className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
+          </button> */}
+          <button onClick={flowRef.current?.saveSchema} className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
             Save Schema
-          </button>
-
-          <button
-            className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]"
-            onClick={() => flowRef.current?.loadSchema("example.yaml")}
-          >
-            <Code size={14} className="hover:cursor-pointer" />
-          </button>
-          <button className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
-            Load Schema
           </button>
         </div>
       </div>

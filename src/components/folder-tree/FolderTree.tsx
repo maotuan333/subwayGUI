@@ -3,6 +3,8 @@ import { open } from '@tauri-apps/api/dialog';
 import { readDir, BaseDirectory } from '@tauri-apps/api/fs';
 import { desktopDir } from '@tauri-apps/api/path';
 import { Tree } from 'react-arborist';
+import { Button } from '../@shadcn/ui/button';
+import { ChevronDown, ChevronRight, FileIcon } from 'lucide-react';
 // Reads the `$APPDATA/users` directory recursively
 
 
@@ -56,21 +58,21 @@ export default () => {
 
 
   return (
-    <>
-      <button onClick={openFileFinder}>Open File</button>
+    <div className='h-full'>
+      <Button className='w-[80%] mt-8 ml-6 rounded-sm !bg-blue-500 hover:!bg-blue-500/[0.8] !text-white' onClick={openFileFinder}>Open Folder</Button>
       <Tree
         data={data}
         openByDefault={false}
         width={"15rem"}
+        style={{ height: '100%' }}
         indent={24}
-        rowHeight={36}
-        paddingTop={30}
+        height={1000}
         paddingBottom={10}
         padding={25 /* sets both */}
       >
         {Node}
       </Tree>
-    </>
+    </div>
   );
 };
 
@@ -78,11 +80,13 @@ export default () => {
 function Node({ node, style, dragHandle }) {
   /* This node instance can do many things. See the API reference. */
   return (
-    <div style={style} ref={dragHandle}>
-      <span onClick={() => { node.isOpen ? node.close() : node.open() }}>
-        {node.isLeaf ? "🖹" : "🗀"}
-      </span>
-      {node.data.name}
+    <div className='hover:bg-seperator'>
+      <div style={style} className='ml-6 flex font-inter text-[13px] items-center gap-2 ' ref={dragHandle}>
+        <span onClick={() => { node.isOpen ? node.close() : node.open() }}>
+          {node.isLeaf ? <FileIcon size={14} /> : node.isOpen ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
+        </span>
+        {node.data.name}
+      </div>
     </div>
   );
 }

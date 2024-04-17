@@ -1,7 +1,6 @@
 import {
   forwardRef,
   useCallback,
-  useContext,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -23,28 +22,21 @@ import ReactFlow, {
   MarkerType,
 } from "reactflow";
 import "reactflow/dist/style.css";
-
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../components/@shadcn/ui/tabs";
 import YAML from "yaml";
-
 import "./index.css";
 import SchemaNode from "./Nodes/SchemaNode";
 import TextUpdaterNode from "./Nodes/TextUpdaterNode";
 import FunctionNode from "./Nodes/FunctionNode";
 import { useRFContext } from "../../contexts/ReactFlowContext";
 import NodeOptionsEdge from "./Edges/NodeOptionsEdge";
-import { ChevronLeft, Code, Trash2, TrashIcon, X } from "lucide-react";
+import { ChevronLeft, Trash2 } from "lucide-react";
 import NodePropertyForm from "../forms/NodePropertyForm";
 import { CustomNodeData } from "../../types/RFNodes"; //okay ~ didn't work?
 import { BaseDirectory, writeTextFile, readTextFile } from "@tauri-apps/api/fs";
 import dagre from "dagre";
-import React from "react";
-
+import { open, save } from "@tauri-apps/api/dialog";
+import { Button } from "../@shadcn/ui/button";
+import { invoke } from "@tauri-apps/api/tauri";
 
 const getLayoutedElements = (elements) => {
 
@@ -52,21 +44,15 @@ const getLayoutedElements = (elements) => {
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({ rankdir: "LR" });
 
-  console.log("set dagre graph");
-
   elements.forEach((el) => {
     if (isNode(el)) {
       dagreGraph.setNode(el.id, { label: el.label, pattern: el.pattern });
-      console.log(`Added node: ${el.id}`);
     } else {
       dagreGraph.setEdge(el.source, el.target);
-      console.log(`Added edge: ${el.source} -> ${el.target}`);
     }
   });
 
   dagre.layout(dagreGraph);
-  console.log("layout dagre graph");
-  console.log(dagreGraph);
 
   return elements.map((el) => {
     if (isNode(el)) {
@@ -104,13 +90,14 @@ interface AddNodeOnEdgeDropProps {
 }
 
 
-const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
+const AddNodeOnEdgeDrop = forwardRef((props: AddNodeOnEdgeDropProps, ref) => {
   const rfApiStore = useStoreApi();
-  const {initialSchema} = props;
+  const { initialSchema } = props;
   const { addSelectedNodes } = rfApiStore.getState();
   const {
     getId,
     nodes,
+    getNodes,
     setNodes,
     onNodesChange,
     removeNode,
@@ -118,15 +105,24 @@ const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
     setEdges,
     onEdgesChange,
   } = useRFContext((s) => s);
-  // @ts-ignore
+
+  const readFileContents = async () => {
+    try {
+      const selectedPath = await open({
+        multiple: false,
+        title: "Open file"
+      });
+      if (!selectedPath) return
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
 
   const loadSchema = async (filename) => {
-    console.log("called");
     const schemaYAML = await readTextFile(`subwayGUI-data/${filename}`, {
       dir: BaseDirectory.Download,
     });
-    console.log("read");
     const schemaData = YAML.parse(schemaYAML);
     console.log(schemaData);
     const parsedNodes: Node<CustomNodeData>[] = schemaData.nodes.map(
@@ -143,7 +139,6 @@ const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
         targetPosition: "left",
       }),
     );
-    console.log(parsedNodes);
     const parsedEdges: Edge[] = schemaData.edges.map((edge) => ({
       id: edge.id,
       source: edge.source,
@@ -153,35 +148,35 @@ const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
         type: MarkerType.ArrowClosed,
       },
     }));
-    console.log(parsedEdges);
     const layoutedNodes = getLayoutedElements(parsedNodes);
-    console.log(layoutedNodes);
     setNodes([...layoutedNodes]);
     setEdges([...parsedEdges]);
-    reactFlowInstance.fitView();
-    console.log(`read in subwaygui-data\\${filename}`);
   };
 
-  const saveSchema = async (filename) =>{
-    const schemaData = YAML.stringify({
-      nodes: nodes.map((node) => ({
+  const saveSchema = async () => {
+    const schemaData = JSON.stringify({
+      nodes: getNodes().map((node) => ({
         id: node.id,
-        label: node.data.label,
-        pattern: node.data?.extension || "",
-        prefix: node.data?.prefix,
-      })),
-      edges: edges.map((edge) => ({
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
+        node_type: "pattern",
+        node_label: node.data.label,
+        node_data: {
+          extension: node.data?.extension,
+          prefix: node.data?.prefix,
+        }
       })),
     });
-    console.log(schemaData);
-    console.log(`subwayGUI-data/${filename}`);
-    await writeTextFile(`subwayGUI-data/${filename}`, schemaData, {
-      dir: BaseDirectory.Download,
-    });
-    console.log("saved");
+    try {
+      const savePath = await save({
+        filters: [{
+          name: 'schema',
+          extensions: ['json']
+        }]
+      });
+      if (!savePath) return;
+      await invoke("save_file", { path: savePath, contents: schemaData })
+    } catch (err) {
+      console.error(err);
+    }
   }
 
 
@@ -192,7 +187,7 @@ const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
 
   // const edges = useStore(store, (s) => s.edges);
   const reactFlowWrapper = useRef(null);
-  // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  // const [nodes, setNodes, onNodesCange] = useNodesState(initialNodes);
   // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   // const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -229,14 +224,16 @@ const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
     onChange: ({ nodes, edges }) => {
       setSelectedNodes(nodes.map((node) => node.id));
       setSelectedEdges(edges.map((edge) => edge.id));
-      // setTimeout(reactFlowInstance.fitView, 200)
     },
   });
 
   const onConnect = useCallback(
     (connection) => {
-      console.log(connection);
-      const edge = { ...connection, type: "addNodeOptions" };
+      const edge = { ...connection };
+      edge.animated = true
+      edge.markerEnd = {
+        type: MarkerType.ArrowClosed,
+      }
       setEdges((eds) => addEdge(edge, eds));
     },
     [setEdges],
@@ -268,9 +265,11 @@ const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
           label: `${type}`,
         },
       };
-      setNodes((nodes) => nodes.concat(newNode));
+
+      setNodes((nodes) => nodes.concat({ ...newNode, data: { label: "File Pattern" } }));
       setTimeout(() => {
         addSelectedNodes([newNode.id]);
+        reactFlowInstance.fitView();
       }, 1);
     },
     [reactFlowInstance],
@@ -282,7 +281,7 @@ const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
       loadSchema(initialSchema);
     }
   }, [initialSchema]);
-  
+
   return (
     <>
       <div
@@ -316,10 +315,6 @@ const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
       </div>
       {selectedNodes.length > 0 ? (
         <div className="bg-primary-gray h-full w-[40rem]">
-          {/* <div>
-              <p>{nodes.find((node) => node.id == selectedNodes[0])?.data?.label}</p>
-              <p>Selected edges: {selectedEdges.join(', ')}</p>
-            </div> */}
           <div className="px-4 flex h-14 items-center justify-between border-seperator border-b-[1px]">
             <div className="flex items-center gap-3">
               <div
@@ -333,9 +328,6 @@ const AddNodeOnEdgeDrop = forwardRef((props:AddNodeOnEdgeDropProps, ref) => {
               <h1 className="font-medium">Node Properties</h1>
             </div>
             <div className="flex items-center gap-2">
-              {/* <div className=" p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]">
-                  <Code size={14} className="hover:cursor-pointer" />
-                </div> */}
               <div
                 className="p-2 rounded-md hover:cursor-pointer hover:bg-red-300/[0.4]"
                 onClick={() =>

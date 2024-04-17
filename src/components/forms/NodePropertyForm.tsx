@@ -7,7 +7,7 @@ import { CustomNodeData } from '~/types/RFNodes';
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../@shadcn/ui/form';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../@shadcn/ui/select';
 
 const formStructureMapping = {
@@ -18,6 +18,7 @@ const formStructureMapping = {
   },
   schemaNode: {
     fields: [
+      { name: 'label', label: 'Label', type: 'text', options: [], required: false },
       { name: 'extension', label: 'File Extension', type: 'text', options: [], required: true },
       { name: 'prefix', label: 'Prefix', type: 'text' },
     ]
@@ -26,7 +27,6 @@ const formStructureMapping = {
 
 const NodePropertyForm = () => {
   const selectedNode = useStore(s => s.getNodes().filter(node => node.selected))[0];
-  // console.log(selectedNode)
   const form = useForm();
   const formStructure = formStructureMapping[selectedNode?.type];
   const setNodes = useRFContext((s) => s.setNodes);
@@ -85,7 +85,7 @@ const NodePropertyForm = () => {
                       <FormItem className='mb-4'>
                         <FormLabel className='flex gap-1'>{field.label} {field.required ? <h1 className='text-red-400'>*</h1> : ''}</FormLabel>
                         <FormControl>
-                          <Input autoComplete='off' onChange={(e) => updateField(e.target?.value, field.name)} value={selectedNode?.data[field.name]} placeholder={`${field.name}...`} {...field} />
+                          <Input value={selectedNode?.data[field.name]} autoComplete='off' onChange={(e) => updateField(e.target?.value, field.name)} placeholder={`${field.name}...`} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

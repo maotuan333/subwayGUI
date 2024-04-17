@@ -12,7 +12,7 @@
   "tauri": {
     "macOSPrivateApi": true,
     "allowlist": {
-      "all": false,
+      "all": true,
       "dialog": {
         "all": true,
         "ask": true,
@@ -26,12 +26,7 @@
       },
       "fs": {
         "all": true,
-        "scope": [
-          "$DESKTOP/subwayGUI_data",
-          "$DESKTOP/subwayGUI_data/*",
-          "$DOWNLOAD/*",
-          "$DOWNLOAD/subwayGUI-data/*"
-        ]
+        "scope": ["**"]
       },
       "shell": {
         "all": false,

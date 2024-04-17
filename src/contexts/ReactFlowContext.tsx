@@ -9,7 +9,7 @@ type RFProviderProps = React.PropsWithChildren<RFProps>;
 export function RFProvider({ children, ...props }: RFProviderProps) {
   const storeRef = useRef<RFStore>();
   if (!storeRef.current) {
-    storeRef.current = createRFStore(props);
+    storeRef.current = createRFStore(props.id, { nodes: props.nodes, edges: props.edges });
   }
   return (
     <ReactFlowContext.Provider value={storeRef.current}>

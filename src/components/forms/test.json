@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "type": "pattern",
+    "data": {
+      "extension": ".exe",
+      "prefix": "text"
+    },
+    "next": 2
+  }
+]

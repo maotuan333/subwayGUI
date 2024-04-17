@@ -2,42 +2,9 @@ import { useState, useRef, useEffect, memo, useContext } from "react";
 import { Handle, Position, NodeToolbar, NodeProps } from "reactflow";
 import { useRFContext } from "../../../contexts/ReactFlowContext";
 import { SchemaNodeData } from "~/types/RFNodes";
-import { Blocks, EllipsisVertical, FileBox, TrashIcon, TriangleAlert } from "lucide-react";
+import { FileBox, TriangleAlert } from "lucide-react";
 
-import { Separator } from "../../../components/@shadcn/ui/separator";
 import MoreActionsButton from "./MoreActions";
-// function EditableLabel({
-//   label,
-//   handleChange,
-//   handleBlur,
-//   handleClick,
-//   isEditing,
-// }) {
-//   const inputRef = useRef(null);
-
-//   useEffect(() => {
-//     if (isEditing && inputRef.current) {
-//       inputRef.current.focus();
-//     }
-//   }, [isEditing]);
-
-//   return (
-//     <input
-//       type="text"
-//       value={label}
-//       onBlur={handleBlur}
-//       onClick={handleClick}
-//       onChange={handleChange}
-//       readOnly={!isEditing}
-//       ref={inputRef}
-//       style={{
-//         border: "none",
-//         outline: "none",
-//         textAlign: "center",
-//       }}
-//     />
-//   );
-// }
 
 function SchemaNode({ id, data, selected }: NodeProps<SchemaNodeData>) {
 
@@ -46,26 +13,6 @@ function SchemaNode({ id, data, selected }: NodeProps<SchemaNodeData>) {
   const fileInputRef = useRef(null);
   const { updateNodeData } = useRFContext((s) => s)
   // const updateNodeData = useRFContext((s) => s.updateNodeData);
-
-  const handleClick = (e) => {
-    setIsEditing(true);
-    setShowTooltip(true);
-    e.stopPropagation();
-  };
-
-  const handleBlur = () => {
-    setIsEditing(false);
-  };
-
-  const handleFileSelectClick = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.value;
-    updateNodeData(id, "filepath", selectedFile);
-    setShowTooltip(false);
-  };
 
   return (
     <>

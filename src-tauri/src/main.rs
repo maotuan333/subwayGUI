@@ -150,6 +150,74 @@ fn fileMatch(directory: &str) -> Result<String, SerializableError> {
         SerializableError::from("Failed to serialize response")
     })
 }
+
+#[tauri::command]
+fn save_file(path: String, contents: String) {
+  fs::write(path, contents).unwrap();
+}
+
+#[derive(Debug, Deserialize)]
+struct Node {
+    id: String,
+    node_type: String,
+    node_label: String,
+    node_data: NodeData,
+}
+
+#[derive(Debug, Deserialize)]
+struct JsonData {
+    nodes: Vec<Node>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct FilePattern {
+    id: String,
+    node_data: NodeData,
+    node_label: String,
+    node_type: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct NodeData {
+    extension: String,
+    #[serde(default)]
+    prefix: String,
+}
+
+fn check_file_patterns(directory: String, extensions: Vec<&str>) -> Vec<bool> {
+    let mut results = vec![false; extensions.len()];
+
+    for entry in WalkDir::new(directory).into_iter().filter_map(Result::ok) {
+        if let Some(file_name) = entry.file_name().to_str() {
+            for (i, &ext) in extensions.iter().enumerate() {
+                if file_name.ends_with(ext) {
+                    results[i] = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    results
+}
+
+#[tauri::command]
+fn find_matches(targetPath: String, schemaPath: String) -> Vec<bool> {
+    let data = fs::read_to_string(schemaPath).expect("Unable to read file");
+    let json_object: serde_json::Value = serde_json::from_str(&data).expect("Unable to parse");
+    let mut extensions = vec![]; 
+    println!("test {} ", json_object["nodes"]);
+    if let Some(nodes) = json_object["nodes"].as_array() {
+      for node in nodes {
+        println!("node {}", node["node_data"]["extension"]);
+        extensions.push(node["node_data"]["extension"].as_str().expect("test"))
+    }
+    }
+    let results = check_file_patterns(targetPath, extensions);
+    results
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*; // Import the functions from the outer module
@@ -187,7 +255,7 @@ async fn read_file(path: std::path::PathBuf) -> Vec<u8> {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![fileMatch])
+        .invoke_handler(tauri::generate_handler![fileMatch, read_file, save_file, find_matches])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

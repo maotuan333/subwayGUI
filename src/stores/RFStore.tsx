@@ -25,7 +25,9 @@ export interface RFState extends RFProps {
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
+  getNodes: () => Node[];
   setNodes: (nodes) => void;
+  addNode: (node) => void;
   removeNode: (nodeId) => void;
   setEdges: (edges) => void;
   updateNodeData: (nodeId: string, field: string, value: string) => void;
@@ -33,7 +35,7 @@ export interface RFState extends RFProps {
 
 export type RFStore = ReturnType<typeof createRFStore>
 
-export const createRFStore = (id:string, initProps?: Partial<RFProps>) => {
+export const createRFStore = (id: string, initProps?: Partial<RFProps>) => {
   const DEFAULT_PROPS: RFProps = {
     id,
     nodes: [],
@@ -61,6 +63,9 @@ export const createRFStore = (id:string, initProps?: Partial<RFProps>) => {
       set({
         edges: addEdge({ ...connection, animated: true }, get().edges),
       });
+    },
+    getNodes: () => {
+      return get().nodes;
     },
     setNodes: (nodes) => {
       set((state) => ({

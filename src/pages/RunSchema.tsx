@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { PanelGroup } from "react-resizable-panels";
-import { useMonaco } from "@monaco-editor/react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { Editor, useMonaco } from "@monaco-editor/react";
 import { useEffect, useRef, useState } from "react";
 import DnDFlow from "../components/canvas/ReactFlowDnd";
 import BlocksIcon from "../assets/svg/blocks.svg?react";
@@ -20,61 +20,90 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "../components/@shadcn/ui/resizable";
-import { ChevronDown, Code } from "lucide-react";
+import { ChevronDown, Code, Code2 } from "lucide-react";
 import { ReactFlowContext } from "../contexts/ReactFlowContext";
 import { createRFStore } from "../stores/RFStore";
 import { invoke } from '@tauri-apps/api/tauri';
 import path from 'path';
+import { open } from "@tauri-apps/api/dialog";
+import { readTextFile } from "@tauri-apps/api/fs";
+import { Button } from "../components/@shadcn/ui/button";
 
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// import { fileURLToPath } from 'url';
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
 
 function RunSchema() {
-  const flowRefs = useRef([]);
-  const editorRef = useRef(null);
-  const monaco = useMonaco();
-  flowRefs.current = [];
-  // TODO How are we gonna pass in backend info
-  const [subways, setSubways] = useState([]);
 
-  // const { screenToFlowPosition, setViewport, setCenter } = useReactFlow();
+  const [schemaPath, setSchemaPath] = useState("");
+  const [schemaContent, setSchemaContent] = useState("");
+  const [directoryPath, setDirectoryPath] = useState("");
+  const [editorActive, setEditorActive] = useState(false);
 
-  useEffect(() => {
-    if (monaco) {
-      monaco.editor.defineTheme("my-theme", {
-        base: "vs",
-        inherit: true,
-        rules: [],
-        colors: {
-          "editor.background": "#000000",
-        },
+  const loadDirectory = async () => {
+    try {
+      const selectedPath = await open({
+        multiple: false,
+        title: "Open directory",
+        directory: true
       });
+      if (!selectedPath) return
+      setDirectoryPath(selectedPath as string);
+      console.log({ target_path: selectedPath, schema_path: schemaPath })
+      const res = await invoke("find_matches", { targetPath: selectedPath, schemaPath: schemaPath })
+      console.log(res)
+    } catch (err) {
+      console.error(err);
     }
-  }, [monaco]);
 
-  function handleEditorDidMount(editor, _) {
-    editorRef.current = editor;
   }
 
-  const handleLoadClick = () => {
-    // Call the Rust function and update the state with the returned data
-    invoke('filematch',{directory: path.resolve(__dirname)}).then((response) => {
-      const data = JSON.parse(response); // Assuming the response is a JSON string
-      console.log(data)
-      setSubways(data); // Update the state with the returned data
-    }).catch((error) => {
-      console.error('Error calling filematch:', error);
-    });
-  };
+  const runSubway = async () => {
+    console.log({ target_path: directoryPath, schema_path: schemaPath })
+    console.log(directoryPath)
+    const res = await invoke("find_matches", { targetPath: directoryPath, schemaPath: schemaPath })
+  }
 
-  const addToRefs = (el) => {
-    if (el && !flowRefs.current.includes(el)) {
-      flowRefs.current.push(el);
+  const loadSchema = async () => {
+    try {
+      const selectedPath = await open({
+        multiple: false,
+        title: "Open file",
+        filters: [
+          {
+            name: 'Schema',
+            extensions: ['json']
+          }
+        ]
+      });
+      if (!selectedPath) return
+      setSchemaPath(selectedPath as string);
+      const fileContent = await readTextFile(selectedPath as string);
+      setSchemaContent(fileContent);
+      setEditorActive(true);
+    } catch (err) {
+      console.error(err);
     }
-    console.log(flowRefs.current);
-  };
+  }
+
+  function setEditorTheme(monaco: any) {
+    monaco.editor.defineTheme('onedark', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        {
+          token: 'comment',
+          foreground: '#5d7988',
+          fontStyle: 'italic'
+        },
+        { token: 'constant', foreground: '#e06c75' }
+      ],
+      colors: {
+        'editor.background': '#21252b'
+      }
+    });
+  }
 
   return (
     <>
@@ -82,91 +111,50 @@ function RunSchema() {
         id="schema-navbar"
         className=" justify-center items-center bg-primary-gray w-full py-2 min-h-12 border-b-[1px] border-seperator flex px-4"
       >
-        <h6 className="text-md font-base">New Run</h6>
+        <h6 className="text-md font-base">New Run <span className="text-xs">{schemaPath ? `(using ${schemaPath})` : ''}</span></h6>
         <div className="ml-auto flex items-center gap-3">
-          {/* @ts-ignore */}
           <button
-            className="p-2 rounded-md hover:cursor-pointer hover:bg-white/[0.4]"
-            onClick={() =>
-              {handleLoadClick()
-              flowRefs.current.map((el) => el.loadSchema("example.yaml"))
-              }
-            }
+            onClick={() => setEditorActive(!editorActive)}
+            className={`p-2 rounded-md hover:cursor-pointer ${editorActive ? 'bg-white/[0.4]' : 'hover:bg-white/[0.4]'}`}
           >
-            <Code size={14} className="hover:cursor-pointer" />
+            <Code size={14} />
           </button>
-          <button className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
+          <button onClick={loadSchema} className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
             Load Schema
+          </button>
+          <button onClick={runSubway} className="px-2 py-1 rounded-md hover:cursor-pointer text-sm bg-blue-500 hover:bg-blue-400">
+            Run Schema
           </button>
         </div>
       </div>
-
-      <ReactFlowProvider>
-        <PanelGroup direction="horizontal">
-          <div className="min-w-[15rem] lg:min-w-[15rem] xl:min-w-[20rem] border-r-[1px] border-seperator bg-primary-gray">
-            <Collapsible defaultOpen={true}>
-              <div
-                className={`${styles["dnd-item-collapsible"]} border-seperator`}
-              >
-                <CollapsibleTrigger asChild>
-                  <div
-                    className={`${styles["dnd-item-collapsible-header"]} p-4 justify-between`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <BlocksIcon height={20} width={20} />
-                      <h5 className="text-[15px] font-medium">Objects</h5>
-                    </div>
-                    <ChevronDown className="h-4 w-4 group-data-[state=open]:animate-spin" />
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div
-                    className={`${styles["dnd-item-collapisble-content"]} grid gap-x-2 gap-y-2 px-4 pb-4`}
-                  >
-                    <DraggableNode
-                      background="#4B8BF3"
-                      nodeType="schemaNode"
-                      label={"Input"}
-                      Icon={<ObjectIcon height={24} width={24} />}
-                    />
-                    <DraggableNode
-                      background="#12B368"
-                      nodeType="input"
-                      label={"Validation"}
-                      Icon={<ValidationIcon height={24} width={24} />}
-                    />
-                    <DraggableNode
-                      background="#8A3FFC"
-                      nodeType="functionNode"
-                      label={"Function"}
-                      Icon={<FunctionIcon height={24} width={24} />}
-                    />
-                  </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
+      {/* <div className="flex"> */}
+      <PanelGroup direction="horizontal" className="flex">
+        <Panel className="w-full" defaultSize={70}>
+          <div className="w-full h-full">
+            {!directoryPath
+              ? <div className="h-full flex items-center justify-center"><Button onClick={loadDirectory} className="px-10 h-14 !text-xl !text-white !bg-blue-500 hover:!bg-blue-500/[0.8]">Open Directory</Button></div>
+              : directoryPath
+            }
           </div>
-          <ResizablePanelGroup direction="vertical" style={{ height: "100vh" }}>
-            {subways.map((item, index) => {
-              const store = createRFStore(`${index}`)
-              return (
-                <>
-                  <ResizablePanel maxSize={30} minSize={15}>
-                    <p>
-                      {item}
-                    </p>
-                    <ReactFlowContext.Provider value={store} key={index}>
-                      <DnDFlow ref={addToRefs} initialSchema="example.yaml"/>
-                    </ReactFlowContext.Provider>
-                  </ResizablePanel>
-                  <ResizableHandle />
-                </>
-              );
-            })}
-            <ResizablePanel style={{ flex: "1 1 auto" }} />
-          </ResizablePanelGroup>
-        </PanelGroup>
-      </ReactFlowProvider>
+        </Panel>
+        <PanelResizeHandle />
+        {
+          editorActive ?
+            <Panel defaultSize={30}>
+              <div>
+                <Editor
+                  theme="vs-dark"
+                  height="90vh"
+                  defaultLanguage="json"
+                  value={schemaContent}
+                // onChange={ }
+                />
+              </div>
+            </Panel>
+            : ''
+        }
+      </PanelGroup>
+      {/* </div> */}
     </>
   );
 }
