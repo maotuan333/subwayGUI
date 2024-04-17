@@ -8,7 +8,7 @@ import ValidationIcon from "../assets/svg/validation.svg?react";
 import ObjectIcon from "../assets/svg/object.svg?react";
 import FunctionIcon from "../assets/svg/function.svg?react";
 import styles from "./RunSchema.module.css";
-import { ReactFlowProvider } from "reactflow";
+import ReactFlow, { Background, BackgroundVariant, Controls, ReactFlowProvider } from "reactflow";
 import DraggableNode from "../components/canvas/DraggableItem";
 import {
   Collapsible,
@@ -28,6 +28,11 @@ import path from 'path';
 import { open } from "@tauri-apps/api/dialog";
 import { readTextFile } from "@tauri-apps/api/fs";
 import { Button } from "../components/@shadcn/ui/button";
+import Sidebar from "../components/canvas/Sidebar";
+import TextUpdaterNode from "../components/canvas/Nodes/TextUpdaterNode";
+import SchemaNode from "../components/canvas/Nodes/SchemaNode";
+import FunctionNode from "../components/canvas/Nodes/FunctionNode";
+import RunSchemaNode from "../components/canvas/Nodes/RunSchemaNode";
 
 // import { fileURLToPath } from 'url';
 // const __filename = fileURLToPath(import.meta.url);
@@ -40,6 +45,19 @@ function RunSchema() {
   const [schemaContent, setSchemaContent] = useState("");
   const [directoryPath, setDirectoryPath] = useState("");
   const [editorActive, setEditorActive] = useState(false);
+  const [nodesGlobal, setNodesGlobal] = useState([]);
+
+  function formatJSON(val = {}) {
+    try {
+      const res = JSON.parse(val);
+      return JSON.stringify(res, null, 2)
+    } catch {
+      const errorJson = {
+        "error": `非法返回${val}`
+      }
+      return JSON.stringify(errorJson, null, 2)
+    }
+  }
 
   const loadDirectory = async () => {
     try {
@@ -51,8 +69,31 @@ function RunSchema() {
       if (!selectedPath) return
       setDirectoryPath(selectedPath as string);
       console.log({ target_path: selectedPath, schema_path: schemaPath })
-      const res = await invoke("find_matches", { targetPath: selectedPath, schemaPath: schemaPath })
-      console.log(res)
+      const res: any = await invoke("find_matches", { targetPath: selectedPath, schemaPath: schemaPath })
+      const matchData = res;
+      const nodeData = JSON.parse(schemaContent)["nodes"];
+      const nodes = []
+      for (let i = 0; i < nodeData.length; i++) {
+        console.log(nodeData[i])
+        console.log(matchData[i])
+        if (matchData[i] || !matchData[i]) {
+          const newNode: any = {
+            id: `${i}`,
+            type: "runSchemaNode",
+            position: {
+              x: i * 300,
+              y: 50,
+            },
+            data: {
+              label: `File Pattern`,
+              match: matchData[i]
+            },
+          };
+          nodes.push(newNode)
+        }
+      }
+      console.log(nodes)
+      setNodesGlobal(nodes);
     } catch (err) {
       console.error(err);
     }
@@ -63,6 +104,35 @@ function RunSchema() {
     console.log({ target_path: directoryPath, schema_path: schemaPath })
     console.log(directoryPath)
     const res = await invoke("find_matches", { targetPath: directoryPath, schemaPath: schemaPath })
+  }
+
+  const nodeTypes = {
+    textUpdater: TextUpdaterNode,
+    runSchemaNode: RunSchemaNode,
+    functionNode: FunctionNode,
+  };
+
+  const TestElement = () => {
+    return (
+      <ReactFlowProvider>
+        <ReactFlow
+          maxZoom={1.25}
+          nodes={nodesGlobal}
+          edges={[]}
+          fitView
+          nodeTypes={nodeTypes}
+
+        >
+          <Background
+            color="#323234"
+            gap={25}
+            size={3}
+            variant={BackgroundVariant.Dots}
+          />
+          <Controls color="white" className="bg-white" />
+        </ReactFlow>
+      </ReactFlowProvider>
+    )
   }
 
   const loadSchema = async () => {
@@ -133,7 +203,7 @@ function RunSchema() {
           <div className="w-full h-full">
             {!directoryPath
               ? <div className="h-full flex items-center justify-center"><Button onClick={loadDirectory} className="px-10 h-14 !text-xl !text-white !bg-blue-500 hover:!bg-blue-500/[0.8]">Open Directory</Button></div>
-              : directoryPath
+              : <TestElement />
             }
           </div>
         </Panel>
@@ -146,8 +216,7 @@ function RunSchema() {
                   theme="vs-dark"
                   height="90vh"
                   defaultLanguage="json"
-                  value={schemaContent}
-                // onChange={ }
+                  value={formatJSON(schemaContent)}
                 />
               </div>
             </Panel>
